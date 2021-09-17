@@ -24,3 +24,4 @@ MANIFEST
 
 .coverage
 .python-version
+.DS_Store
