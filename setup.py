@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="PyAltium-tgross",
+    name="PyAltium",
     version="0.0.3",
     author="Trevor Gross",
     author_email="t.gross35@gmail.com",
