@@ -5,24 +5,29 @@ Everything needed to interact with SchLib files
 """
 
 import olefile
-import pdb
-from .helpers import (
+
+from pyaltium.exceptions import PyAltiumError
+from pyaltium.helpers import (
     altium_string_split,
     altium_value_from_key,
-    sch_sectionkeys_to_list
+    sch_sectionkeys_to_list,
 )
 
 """Magic Strings"""
 
-SCHLIB_HEADER = 'HEADER=Protel for Windows - Schematic Library Editor Binary File Version 5.0'
-PCBLIB_HEADER = 'PCB 6.0 Binary Library File'
+SCHLIB_HEADER = (
+    "HEADER=Protel for Windows - Schematic Library Editor Binary File Version 5.0"
+)
+PCBLIB_HEADER = "PCB 6.0 Binary Library File"
 MAX_READ_SIZE_BYTES = 65536
 
-class AltiumFileType():
+
+class AltiumFileType:
     """
     This class will generally not be exposed. Simply
     intended to set up children
     """
+
     _file_name = None
     _header_dict = None
     _section_keys_dict = None
@@ -40,46 +45,51 @@ class AltiumFileType():
         Check if file is valid (to the best of our ability) then update
         generic information
         """
-        assert olefile.isOleFile(file_name)
-        assert self._verify_file_type(file_name)
+        if not olefile.isOleFile(file_name):
+            raise PyAltiumError("Unable to open file. Is it actually an Altium binary?")
+
+        if not self._verify_file_type(file_name):
+            raise PyAltiumError("Appears to be the wrong file type.")
+
         self._file_name = file_name
         self._update_header_and_section_keys()
         self._update_item_list()
 
     def _update_header_and_section_keys(self) -> None:
-        """Just update class's _header_dict object"""
+        """Just update class's _header_dict object."""
         raise NotImplementedError()
 
     def _update_item_list(self) -> None:
-        """Generate a list. This will happen in the inherited class"""
+        """Generate a list. This will happen in the inherited class."""
         raise NotImplementedError()
 
     def _verify_file_type(self, fname: str) -> bool:
+        """Verify the file type is what is expected."""
         raise NotImplementedError()
 
 
 class SchLib(AltiumFileType):
     """Main object to interact with schlib"""
 
-    def _verify_file_type(self, fname:str) -> bool:
-        """Check if our magic string is in the header"""
+    def _verify_file_type(self, fname: str) -> bool:
+        """Check if our magic string is in the header."""
         with olefile.OleFileIO(fname) as ole:
             # Open the fileheader stream
-            fh = ole.openstream('FileHeader')
-            fh_str = fh.read(128).decode('utf8')
+            fh = ole.openstream("FileHeader")
+            fh_str = fh.read(128).decode("utf8")
 
         return SCHLIB_HEADER in fh_str
 
     def _update_header_and_section_keys(self) -> None:
-        """Just update class's _header_dict object"""
+        """Just update class's _header_dict object."""
         with olefile.OleFileIO(self._file_name) as ole:
             # Open the fileheader stream
-            fh = ole.openstream('FileHeader')
-            fh_str = fh.read(MAX_READ_SIZE_BYTES).decode('utf8')
+            fh = ole.openstream("FileHeader")
+            fh_str = fh.read(MAX_READ_SIZE_BYTES).decode("utf8")
 
             # Open the sectionkeys stream
-            sk = ole.openstream('SectionKeys')
-            sk_str = sk.read(MAX_READ_SIZE_BYTES).decode('utf8')
+            sk = ole.openstream("SectionKeys")
+            sk_str = sk.read(MAX_READ_SIZE_BYTES).decode("utf8")
 
         self._header_dict = altium_string_split(fh_str)
         self._section_keys_dict = altium_string_split(sk_str)
@@ -87,14 +97,14 @@ class SchLib(AltiumFileType):
     def _update_item_list(self) -> None:
         """
         Override main class, just update the list of items
-        
+
         Most of this information is kept in the file header. However, we need
         to get some information from sectionkeys.
         """
         d = self._header_dict
 
         # Get the component count so we know what to look for
-        item_count = int(altium_value_from_key(d, 'CompCount'))
+        item_count = int(altium_value_from_key(d, "CompCount"))
 
         self._items_list = []
 
@@ -102,34 +112,34 @@ class SchLib(AltiumFileType):
 
         # Loop through each item listed in the fileheader
         for i in range(0, item_count - 1):
-            libref = altium_value_from_key(d, 'LibRef' + str(i))
-            description = altium_value_from_key(d, 'CompDescr' + str(i))
-            partcount = int(altium_value_from_key(d, 'PartCount' + str(i))) - 1
+            libref = altium_value_from_key(d, "LibRef" + str(i))
+            description = altium_value_from_key(d, "CompDescr" + str(i))
+            partcount = int(altium_value_from_key(d, "PartCount" + str(i))) - 1
 
             if libref in sec_keys:
                 sectionkey = sec_keys[libref]
             else:
                 sectionkey = libref
 
-            self._items_list.append({
-                'libref': libref,
-                'description': description,
-                'partcount': partcount,
-                'sectionkey': sectionkey
-            })
-
+            self._items_list.append(
+                {
+                    "libref": libref,
+                    "description": description,
+                    "partcount": partcount,
+                    "sectionkey": sectionkey,
+                }
+            )
 
     def list_items(self) -> list:
         return self._items_list
-            
 
 
 # class SchLibItem():
 #     def __init__(self):
 #         pass
 
-    # def __respr__(self):
-    #     pass
+# def __respr__(self):
+#     pass
 
 
 class PcbLib(AltiumFileType):
@@ -139,8 +149,8 @@ class PcbLib(AltiumFileType):
         """Check if our magic string is in the header"""
         with olefile.OleFileIO(fname) as ole:
             # Open the fileheader stream
-            fh = ole.openstream('FileHeader')
-            fh_str = fh.read(128).decode('utf8')
+            fh = ole.openstream("FileHeader")
+            fh_str = fh.read(128).decode("utf8")
 
         return PCBLIB_HEADER in fh_str
 
@@ -148,12 +158,12 @@ class PcbLib(AltiumFileType):
         """Just update class's _header_dict object"""
         with olefile.OleFileIO(self._file_name) as ole:
             # Open the fileheader stream
-            fh = ole.openstream('FileHeader')
-            fh_str = fh.read(MAX_READ_SIZE_BYTES).decode('utf8')
+            fh = ole.openstream("FileHeader")
+            fh_str = fh.read(MAX_READ_SIZE_BYTES).decode("utf8")
 
             # Open the sectionkeys stream
-            sk = ole.openstream('SectionKeys')
-            sk_str = sk.read(MAX_READ_SIZE_BYTES).decode('utf8')
+            sk = ole.openstream("SectionKeys")
+            sk_str = sk.read(MAX_READ_SIZE_BYTES).decode("utf8")
 
         self._header_dict = altium_string_split(fh_str)
         self._section_keys_dict = altium_string_split(sk_str)
@@ -172,14 +182,15 @@ class PcbLib(AltiumFileType):
             # rather than list of list of str)
             for lib_item in (s for s in storages_list if len(s) == 1):
                 # Ignore this metadata stream
-                if ('fileversioninfo' in lib_item[0].lower()) or ('library' in lib_item[0].lower()):
+                if ("fileversioninfo" in lib_item[0].lower()) or (
+                    "library" in lib_item[0].lower()
+                ):
                     continue
 
                 # We want the paramaters stream within our storage
-                lib_item.append('Parameters')
+                lib_item.append("Parameters")
 
-                param_bytestring = ole.openstream(
-                    lib_item).read(MAX_READ_SIZE_BYTES)
+                param_bytestring = ole.openstream(lib_item).read(MAX_READ_SIZE_BYTES)
 
                 # First 4 bytes seem to be random noise
                 param_bytestring = param_bytestring[4:]
@@ -187,35 +198,35 @@ class PcbLib(AltiumFileType):
                 # Note: don't really want to ignore errors but
                 # '3LED ArrayVertical 2mm TH' has a mystery character
                 params_list = altium_string_split(
-                    param_bytestring.decode('utf8', errors="ignore"))
+                    param_bytestring.decode("utf8", errors="ignore")
+                )
 
-                footprintref = altium_value_from_key(params_list, 'PATTERN')
-                description = altium_value_from_key(params_list, 'DESCRIPTION')
-                
-                height_tmp = altium_value_from_key(params_list, 'HEIGHT').lower()
+                footprintref = altium_value_from_key(params_list, "PATTERN")
+                description = altium_value_from_key(params_list, "DESCRIPTION")
 
-                if 'mm' in height_tmp:
-                    height = round(float(height_tmp.replace('mm','')), 2)
+                height_tmp = altium_value_from_key(params_list, "HEIGHT").lower()
 
-                if 'mil' in height_tmp:
-                    height = round(float(height_tmp.replace('mil', '')) * 0.0254, 2)
+                if "mm" in height_tmp:
+                    height = round(float(height_tmp.replace("mm", "")), 2)
 
-                self._items_list.append({
-                    'footprintref': footprintref,
-                    'description': description,
-                    'height': height,
-                })
+                if "mil" in height_tmp:
+                    height = round(float(height_tmp.replace("mil", "")) * 0.0254, 2)
 
-            
+                self._items_list.append(
+                    {
+                        "footprintref": footprintref,
+                        "description": description,
+                        "height": height,
+                    }
+                )
 
     def list_items(self) -> list:
         return self._items_list
-
 
 
 # class PcbLibItem():
 #     def __init__(self):
 #         pass
 
-    # def __respr__(self):
-    #     pass
+# def __respr__(self):
+#     pass

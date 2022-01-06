@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bddaa883c0e434387e9264c4f80478fcd898b55a3dedbe1d8400844fb88e16a7"
+            "sha256": "e27115077fd4a801c7bb9c13619054b1d0ac2740d9872106218e165c1254b3b7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,7 +15,15 @@
             }
         ]
     },
-    "default": {},
+    "default": {
+        "olefile": {
+            "hashes": [
+                "sha256:133b031eaf8fd2c9399b78b8bc5b8fcbe4c31e85295749bb17a87cba8f3c3964"
+            ],
+            "index": "pypi",
+            "version": "==0.46"
+        }
+    },
     "develop": {
         "attrs": {
             "hashes": [
@@ -143,7 +151,7 @@
                 "sha256:4ca091dea149f945ec56afb48dae714f21e8692ef22a395223bcd328961b6a0e",
                 "sha256:7f001e5ac290a0c0401508864c7ec868be4e701886d5b573a9528ed3973d9d3b"
             ],
-            "markers": "python_version >= '3.10'",
+            "markers": "python_version >= '3.6'",
             "version": "==4.0.1"
         }
     }
