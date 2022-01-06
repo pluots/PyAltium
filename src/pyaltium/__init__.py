@@ -1,4 +1,4 @@
 """__init__.py"""
 
-from .types import SchLib
-from .types import PcbLib
+from pyaltium.pcblib import PcbLib
+from pyaltium.schlib import SchLib
