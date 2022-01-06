@@ -12,4 +12,4 @@ workflows:
                   args: "--ignore-pipfile --dev --python 3.8"
                   pkg-manager: pipenv
                   test-tool: pytest
-                  version: "3.8"
+                  version: "3.9"

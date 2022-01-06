@@ -28,7 +28,7 @@ class PcbLib(AltiumLibraryType):
             # file makes 0 sense (yet)
             storages_list = ole.listdir(streams=False, storages=True)
 
-            self._items_list = []
+            self.items_list = []
 
             # Need to select only items in storages_list with len 1 (any more
             # would be a subdir) then select 0th element (to get list of str
@@ -65,7 +65,7 @@ class PcbLib(AltiumLibraryType):
                 if "mil" in height_tmp:
                     height = round(float(height_tmp.replace("mil", "")) * 0.0254, 2)
 
-                self._items_list.append(
+                self.items_list.append(
                     PcbLibItem(
                         footprintref=footprintref,
                         description=description,
@@ -82,15 +82,15 @@ class PcbLibItem(AltiumLibraryItemType):
         description: str,
         height: float,
         parent_fname: str,
-    ):
+    ) -> None:
+        super().__init__()
         self.footprintref = footprintref
         self.description = description
         self.height = height
         self._file_name = parent_fname
 
-    def _load(self):
-        """"""
-        pass
+    def _run_load(self) -> None:
+        raise NotImplementedError
 
     def as_dict(self) -> dict:
         """Create a parsable dict."""

@@ -1,7 +1,14 @@
 """helpers.py"""
+import re
+
 import olefile
 
 from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
+
+re_before_first_record = re.compile(r"^.*?(\|RECORD)")
+
+# Ignore |& bridges, like for pin records
+re_split_exclude_ampersand = re.compile(r"\|(?<!\|&)")
 
 
 def altium_string_split(s: str) -> list:
@@ -54,3 +61,20 @@ def read_decode_stream(
         except OSError:
             # Can't find stream
             return ""
+
+
+def eval_bool(b: str) -> bool:
+    """Evaluate possible bool values"""
+    return b.lower() in ("1", "t", "true")
+
+
+def eval_color(c: str) -> str:
+    """Fix the dumb color flip flop."""
+    if c is None:
+        return "#FFFFFF"
+    ci = int(c)
+    r = ci & 0x0000FF
+    g = (ci & 0x00FF00) >> 8
+    b = (ci & 0xFF0000) >> 16
+
+    return f"#{r:02x}{g:02x}{b:02x}"
