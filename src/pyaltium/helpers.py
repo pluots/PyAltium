@@ -1,4 +1,7 @@
 """helpers.py"""
+import olefile
+
+from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
 
 
 def altium_string_split(s: str) -> list:
@@ -38,3 +41,16 @@ def sch_sectionkeys_to_dict(arr: list) -> dict:
         )
 
     return retdict
+
+
+def read_decode_stream(
+    filename: str, streamname: str, readbytes: int = MAX_READ_SIZE_BYTES
+) -> str:
+    """Read a stream (in one go) and decode it. Maybe add yield in the future."""
+    with olefile.OleFileIO(filename) as ole:
+        try:
+            stream = ole.openstream(streamname)
+            return stream.read(readbytes).decode("utf8")
+        except OSError:
+            # Can't find stream
+            return ""

@@ -1,11 +1,11 @@
 import olefile
 
-from pyaltium.base import AltiumFileType
+from pyaltium.base import AltiumLibraryItemType, AltiumLibraryType
 from pyaltium.helpers import altium_string_split, altium_value_from_key
 from pyaltium.magicstrings import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
 
 
-class PcbLib(AltiumFileType):
+class PcbLib(AltiumLibraryType):
     """Main object to interact with PCBLib"""
 
     def _verify_file_type(self, fname: str) -> bool:
@@ -66,26 +66,36 @@ class PcbLib(AltiumFileType):
                     height = round(float(height_tmp.replace("mil", "")) * 0.0254, 2)
 
                 self._items_list.append(
-                    {
-                        "footprintref": footprintref,
-                        "description": description,
-                        "height": height,
-                    }
+                    PcbLibItem(
+                        footprintref=footprintref,
+                        description=description,
+                        height=height,
+                        parent_fname=self._file_name,
+                    )
                 )
 
-    def list_items(self) -> list:
-        return self._items_list
 
+class PcbLibItem(AltiumLibraryItemType):
+    def __init__(
+        self,
+        footprintref: str,
+        description: str,
+        height: float,
+        parent_fname: str,
+    ):
+        self.footprintref = footprintref
+        self.description = description
+        self.height = height
+        self._file_name = parent_fname
 
-# class PcbLibItem():
-#     def __init__(self):
-#         pass
+    def _load(self):
+        """"""
+        pass
 
-# def __respr__(self):
-#     pass
-# class SchLibItem():
-#     def __init__(self):
-#         pass
-
-# def __respr__(self):
-#     pass
+    def as_dict(self) -> dict:
+        """Create a parsable dict."""
+        return {
+            "footprintref": self.footprintref,
+            "description": self.description,
+            "height": self.height,
+        }

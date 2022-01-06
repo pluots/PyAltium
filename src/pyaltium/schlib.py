@@ -1,6 +1,4 @@
-
-
-from pyaltium.base import AltiumFileType
+from pyaltium.base import AltiumLibraryItemType, AltiumLibraryType
 from pyaltium.helpers import (
     altium_string_split,
     altium_value_from_key,
@@ -9,7 +7,7 @@ from pyaltium.helpers import (
 from pyaltium.magicstrings import SCHLIB_HEADER
 
 
-class SchLib(AltiumFileType):
+class SchLib(AltiumLibraryType):
     """Main object to interact with schematic libraries."""
 
     def _verify_file_type(self, fname: str) -> bool:
@@ -52,21 +50,40 @@ class SchLib(AltiumFileType):
                 sectionkey = libref
 
             self._items_list.append(
-                {
-                    "libref": libref,
-                    "description": description,
-                    "partcount": partcount,
-                    "sectionkey": sectionkey,
-                }
+                SchLibItem(
+                    libref=libref,
+                    description=description,
+                    partcount=partcount,
+                    sectionkey=sectionkey,
+                    parent_fname=self._file_name,
+                )
             )
 
-    def list_items(self) -> list:
-        return self._items_list
 
+class SchLibItem(AltiumLibraryItemType):
+    def __init__(
+        self,
+        libref: str,
+        sectionkey: str,
+        description: str,
+        partcount: int,
+        parent_fname: str,
+    ):
+        self.libref = libref
+        self.sectionkey = sectionkey
+        self.description = description
+        self.partcount = partcount
+        self._file_name = parent_fname
 
-# class SchLibItem():
-#     def __init__(self):
-#         pass
+    def _load(self):
+        """"""
+        pass
 
-# def __respr__(self):
-#     pass
+    def as_dict(self) -> dict:
+        """Create a parsable dict."""
+        return {
+            "libref": self.libref,
+            "description": self.description,
+            "partcount": self.partcount,
+            "sectionkey": self.sectionkey,
+        }

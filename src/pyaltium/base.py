@@ -8,11 +8,31 @@ Everything needed to interact with SchLib files
 import olefile
 
 from pyaltium.exceptions import PyAltiumError
-from pyaltium.helpers import altium_string_split, altium_value_from_key
+from pyaltium.helpers import read_decode_stream
 from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
 
 
-class AltiumFileType:
+class OleMixin:
+    """Helper functions for anything with an ole _file_name object."""
+
+    def _list_storages(self):
+        with olefile.OleFileIO(self._file_name) as ole:
+            return ole.listdir()
+
+    def _read_decode_stream(
+        self, streamname: str, readbytes: int = MAX_READ_SIZE_BYTES
+    ) -> str:
+        """Read a stream (in one go) and decode it. Maybe add yield in the future."""
+        with olefile.OleFileIO(self._file_name) as ole:
+            try:
+                stream = ole.openstream(streamname)
+                return stream.read(readbytes).decode("utf8")
+            except OSError:
+                # Can't find stream
+                return ""
+
+
+class AltiumFileType(OleMixin):
     """This class will generally not be exposed.
     Just intended to set up children
     """
@@ -27,7 +47,7 @@ class AltiumFileType:
         if file_name is not None:
             self.set_file_name(file_name)
 
-    def __respr__(self):
+    def __repr__(self):
         return self._file_name
 
     def set_file_name(self, file_name: str) -> None:
@@ -57,14 +77,22 @@ class AltiumFileType:
         """Verify the file type is what is expected."""
         raise NotImplementedError()
 
-    def _read_decode_stream(
-        self, streamname: str, readbytes: int = MAX_READ_SIZE_BYTES
-    ) -> str:
-        """Read a stream (in one go) and decode it. Maybe add yield in the future."""
-        with olefile.OleFileIO(self._file_name) as ole:
-            try:
-                stream = ole.openstream(streamname)
-                return stream.read(readbytes).decode("utf8")
-            except OSError:
-                # Can't find stream
-                return ""
+
+class AltiumLibraryType(AltiumFileType):
+    def list_items(self, as_dict=False) -> list:
+        """Return a list of all the items.
+
+        Optionally return them as a dictionary."""
+
+        if not as_dict:
+            return self._items_list
+
+        return [item.as_dict() for item in self._items_list]
+
+
+class AltiumLibraryItemType(OleMixin):
+    def _as_dict(self):
+        raise NotImplementedError
+
+    def _load(self):
+        raise NotImplementedError
