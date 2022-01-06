@@ -9,7 +9,10 @@ workflows:
     mainwf:
         jobs:
             - python/test:
-                  args: "--dev"
+                  args:
+                      - "--dev"
+                      - "--python"
+                      - "3.6"
                   pkg-manager: pipenv
                   test-tool: pytest
                   version: "3.6"
