@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="PyAltium",
-    version="0.0.3",
+    version="0.1.0",
     author="Trevor Gross",
     author_email="t.gross35@gmail.com",
     description="A package for reading Altium files",
@@ -24,4 +24,3 @@ setuptools.setup(
     package_dir={"": "src"},
     python_requires=">=3.6",
 )
-
