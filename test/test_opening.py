@@ -12,10 +12,10 @@ import pdb
 class TestOpening:
     def test_schlib(self):
         # Quick schlib test
-        sl = SchLib("tests/files/SchLib1.SchLib")
-        pp.pprint(sl.list_items())
+        sl = SchLib("test/files/SchLib1.SchLib")
+        assert len(sl.list_items()) > 0
 
     def test_pcblib(self):
         # Quick PCBLib test
-        pl = PcbLib("tests/files/PcbLib1.PcbLib")
-        pp.pprint(pl.list_items())
+        pl = PcbLib("test/files/PcbLib1.PcbLib")
+        assert len(pl.list_items()) > 0

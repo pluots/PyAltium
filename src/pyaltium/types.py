@@ -10,7 +10,7 @@ from pyaltium.exceptions import PyAltiumError
 from pyaltium.helpers import (
     altium_string_split,
     altium_value_from_key,
-    sch_sectionkeys_to_list,
+    sch_sectionkeys_to_dict,
 )
 
 """Magic Strings"""
@@ -30,10 +30,10 @@ class AltiumFileType:
 
     _file_name = None
     _header_dict = None
-    _section_keys_dict = None
+    _section_keys_list = None
     _items_list = None
 
-    def __init__(self, file_name=None) -> None:
+    def __init__(self, file_name: str = None) -> None:
         if file_name is not None:
             self.set_file_name(file_name)
 
@@ -83,16 +83,19 @@ class SchLib(AltiumFileType):
     def _update_header_and_section_keys(self) -> None:
         """Just update class's _header_dict object."""
         with olefile.OleFileIO(self._file_name) as ole:
-            # Open the fileheader stream
+            # Open the fileheader streamrs
             fh = ole.openstream("FileHeader")
             fh_str = fh.read(MAX_READ_SIZE_BYTES).decode("utf8")
 
-            # Open the sectionkeys stream
-            sk = ole.openstream("SectionKeys")
-            sk_str = sk.read(MAX_READ_SIZE_BYTES).decode("utf8")
+            # Open the sectionkeys stream - may be none
+            try:
+                sk = ole.openstream("SectionKeys")
+                sk_str = sk.read(MAX_READ_SIZE_BYTES).decode("utf8")
+            except OSError:
+                sk_str = ""
 
         self._header_dict = altium_string_split(fh_str)
-        self._section_keys_dict = altium_string_split(sk_str)
+        self._section_keys_list = altium_string_split(sk_str)
 
     def _update_item_list(self) -> None:
         """
@@ -108,7 +111,7 @@ class SchLib(AltiumFileType):
 
         self._items_list = []
 
-        sec_keys = sch_sectionkeys_to_list(self._section_keys_dict)
+        sec_keys = sch_sectionkeys_to_dict(self._section_keys_list)
 
         # Loop through each item listed in the fileheader
         for i in range(0, item_count - 1):
@@ -166,7 +169,7 @@ class PcbLib(AltiumFileType):
             sk_str = sk.read(MAX_READ_SIZE_BYTES).decode("utf8")
 
         self._header_dict = altium_string_split(fh_str)
-        self._section_keys_dict = altium_string_split(sk_str)
+        self._section_keys_list = altium_string_split(sk_str)
 
     def _update_item_list(self) -> None:
         with olefile.OleFileIO(self._file_name) as ole:

@@ -6,9 +6,10 @@ orbs:
     python: circleci/python@1.5.0
 
 workflows:
-    example-workflow:
+    mainwf:
         jobs:
             - python/test:
-                  pkg-manager: pip-dist
+                  args: "--dev"
+                  pkg-manager: pipenv
                   test-tool: pytest
                   version: "3.6"
