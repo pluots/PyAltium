@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
@@ -7,6 +9,9 @@ from pyaltium.helpers import (
     altium_value_from_key,
     eval_bool,
     eval_color,
+    getfloat,
+    getint,
+    normalize_dict,
     re_before_first_record,
     sch_sectionkeys_to_dict,
 )
@@ -114,52 +119,14 @@ class SchLibItem(AltiumLibraryItemType):
         # Result is something like
         # [{"RECORD": "34", "Location.X": "-5", "Location.Y": "10",...},...]
 
-        # Turn it into a list of objects
-        records = [SchematicRecord(rec) for rec in records]
-
-        self._loaded_data = records
+        self._loaded_data = [SchematicRecord(rec) for rec in records]
 
     def _draw(self, ax: plt.Axes) -> None:
         """Create the drawing on the axes"""
         records = self._loaded_data
         part_display_mode = 1
         for record in records:
-            typ = record.record_type
-            params = record.parameters
-            try:
-                display_mode = int(params.get("OwnerPartDisplayMode", 1))
-                part_id = params.get("OwnerPartID", 1)
-
-                if display_mode != part_display_mode:
-                    continue
-
-                if typ == SchematicRecordType.RECTANGLE:
-                    bl_x = float(params.get("Location.X", 0))
-                    bl_y = float(params.get("Location.Y", 0))
-                    tr_x = float(params.get("Corner.X", 0))
-                    tr_y = float(params.get("Corner.Y", 0))
-                    linewidth = float(params.get("LineWidth", 0.4)) * 10
-                    is_solid = eval_bool(params.get("IsSolid", "1"))
-                    border_color = eval_color(params.get("Color"))
-                    fill_color = eval_color(params.get("AreaColor"))
-
-                    fill_color = fill_color if is_solid else "none"
-
-                    rect = patches.Rectangle(
-                        (bl_x, bl_y),
-                        width=tr_x - bl_x,
-                        height=tr_y - bl_y,
-                        linewidth=linewidth,
-                        edgecolor=border_color,
-                        facecolor=fill_color,
-                    )
-                    ax.add_patch(rect)
-
-                # elif record.record_type==SchematicRecord.
-
-            except KeyError:
-                # If we are missing a key, we wouldn't be able to draw properly
-                pass
+            record.draw(ax, part_display_mode)
 
     def as_dict(self) -> dict:
         """Create a parsable dict."""
@@ -179,15 +146,55 @@ class SchematicRecord:
 
     def __init__(self, parameters: dict) -> None:
         self.record_type = get_sch_record(parameters.get("RECORD", 0))
-        self.parameters = parameters
+        self.parameters = normalize_dict(parameters)
 
-        pins = self.parameters.get("AllPinCount")
-        if pins:
-            pass
-            # handle_allpins_obj(pins)
-
-    def draw(self, ax: plt.Axes) -> None:
+    def draw(self, ax: plt.Axes, part_display_mode: int = 1) -> None:
         """Draw this single object on matplotlib axes."""
+        typ = self.record_type
+        params = self.parameters
+
+        try:
+            display_mode = int(params.get("OwnerPartDisplayMode", 1))
+            part_id = params.get("OwnerPartID", 1)
+
+            if display_mode != part_display_mode:
+                return
+
+            loc_x = getint(params, "Location.X")
+            loc_y = getint(params, "Location.Y")
+            rotation = getint(params, "Rotation")
+            linewidth = getfloat(params, "LineWidth", 0.4) * 10
+
+            if typ == SchematicRecordType.RECTANGLE:
+                tr_x = getint(params, "Corner.X")
+                tr_y = getint(params, "Corner.Y")
+                is_solid = eval_bool(params.get("IsSolid", "1"))
+                border_color = eval_color(params.get("Color"))
+                fill_color = eval_color(params.get("AreaColor"))
+
+                fill_color = fill_color if is_solid else "none"
+
+                rect = patches.Rectangle(
+                    (loc_x, loc_y),
+                    width=tr_x - loc_x,
+                    height=tr_y - loc_y,
+                    linewidth=linewidth,
+                    edgecolor=border_color,
+                    facecolor=fill_color,
+                )
+                ax.add_patch(rect)
+
+            elif typ == SchematicRecordType.PIN:
+                pinlength = getint(params, "PinLength")
+                x1 = loc_x + math.cos(math.radians(rotation)) * pinlength
+                y1 = loc_y + math.sin(math.radians(rotation)) * pinlength
+                ax.plot((loc_x, x1), (loc_y, y1), "k", linewidth=linewidth)
+
+            # elif record.record_type==SchematicRecord.
+
+        except KeyError:
+            # If we are missing a key, we wouldn't be able to draw properly
+            pass
 
     def __repr__(self) -> str:
         return f"<SchematicRecord> {self.record_type.name}"

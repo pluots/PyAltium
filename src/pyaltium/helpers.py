@@ -1,5 +1,6 @@
 """helpers.py"""
 import re
+from typing import Any
 
 import olefile
 
@@ -78,3 +79,22 @@ def eval_color(c: str) -> str:
     b = (ci & 0xFF0000) >> 16
 
     return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def normalize_dict(d: dict) -> dict:
+    """Decode dictionary key/values and remove extra binary characters."""
+
+    def norm_value(x: Any):
+        if not isinstance(x, bytes):
+            return x
+        return "".join(filter(str.isalnum, x.decode("utf8")))
+
+    return {norm_value(k): norm_value(v) for k, v in d.items() if k and v}
+
+
+def getfloat(params: dict, key: str, default: float = 0) -> float:
+    return float(params.get(key, default))
+
+
+def getint(params: dict, key: str, default: int = 0) -> int:
+    return int(params.get(key, default))
