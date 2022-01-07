@@ -116,6 +116,7 @@ class SchLibItem(AltiumLibraryItemType):
         print(f"Processing {self.name}")
         records = handle_pin_records(records)
 
+        pass
         # Result is something like
         # [{"RECORD": "34", "Location.X": "-5", "Location.Y": "10",...},...]
 
@@ -145,8 +146,8 @@ class SchematicRecord:
     """An object record stored in a schematic."""
 
     def __init__(self, parameters: dict) -> None:
-        self.record_type = get_sch_record(parameters.get("RECORD", 0))
         self.parameters = normalize_dict(parameters)
+        self.record_type = get_sch_record(self.parameters.get("RECORD", 0))
 
     def draw(self, ax: plt.Axes, part_display_mode: int = 1) -> None:
         """Draw this single object on matplotlib axes."""
@@ -164,31 +165,58 @@ class SchematicRecord:
             loc_y = getint(params, "Location.Y")
             rotation = getint(params, "Rotation")
             linewidth = getfloat(params, "LineWidth", 0.4) * 10
+            color = eval_color(params.get("Color"))
 
             if typ == SchematicRecordType.RECTANGLE:
                 tr_x = getint(params, "Corner.X")
                 tr_y = getint(params, "Corner.Y")
                 is_solid = eval_bool(params.get("IsSolid", "1"))
-                border_color = eval_color(params.get("Color"))
                 fill_color = eval_color(params.get("AreaColor"))
 
                 fill_color = fill_color if is_solid else "none"
-
+                print(f"RECT {(loc_x, loc_y)} {(tr_x - loc_x,tr_y - loc_y)}")
                 rect = patches.Rectangle(
                     (loc_x, loc_y),
                     width=tr_x - loc_x,
                     height=tr_y - loc_y,
                     linewidth=linewidth,
-                    edgecolor=border_color,
+                    edgecolor=color,
                     facecolor=fill_color,
                 )
                 ax.add_patch(rect)
 
             elif typ == SchematicRecordType.PIN:
                 pinlength = getint(params, "PinLength")
+                print(f"PIN {(loc_x, loc_y)} {pinlength}")
                 x1 = loc_x + math.cos(math.radians(rotation)) * pinlength
                 y1 = loc_y + math.sin(math.radians(rotation)) * pinlength
                 ax.plot((loc_x, x1), (loc_y, y1), "k", linewidth=linewidth)
+
+            elif typ == SchematicRecordType.LABEL:
+                just = getint(params, "Justification", 0)
+                justMap = {
+                    0: ("bottom", "left"),
+                    1: ("bottom", "center"),
+                    2: ("bottom", "right"),
+                    3: ("center", "left"),
+                    4: ("center", "center"),
+                    5: ("center", "right"),
+                    6: ("top", "left"),
+                    7: ("top", "center"),
+                    8: ("top", "right"),
+                }
+                jm = justMap[just]
+                ax.text(
+                    loc_x,
+                    loc_y,
+                    params.get("Text", ""),
+                    color=color,
+                    verticalalignment=jm[0],
+                    horizontalalignment=jm[1],
+                )
+
+            # else:
+            #     print(typ)
 
             # elif record.record_type==SchematicRecord.
 

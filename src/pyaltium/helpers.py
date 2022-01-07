@@ -7,6 +7,7 @@ import olefile
 from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
 
 re_before_first_record = re.compile(r"^.*?(\|RECORD)")
+re_cleanstr = re.compile(r"[^\w_\.]")
 
 # Ignore |& bridges, like for pin records
 re_split_exclude_ampersand = re.compile(r"\|(?<!\|&)")
@@ -87,7 +88,7 @@ def normalize_dict(d: dict) -> dict:
     def norm_value(x: Any):
         if not isinstance(x, bytes):
             return x
-        return "".join(filter(str.isalnum, x.decode("utf8")))
+        return re_cleanstr.sub("", x.decode("utf8", "ignore"))
 
     return {norm_value(k): norm_value(v) for k, v in d.items() if k and v}
 

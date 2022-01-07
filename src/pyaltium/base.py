@@ -122,7 +122,21 @@ class AltiumLibraryItemType(OleMixin):
     def get_svg(self):
         self._load()
         fig, ax = plt.subplots()
+        ax.set_aspect("equal")
         self._draw(ax)
         ax.axis("off")
         ax.autoscale(tight=True)
-        fig.savefig(f"testout/{self.name}", bbox_inches="tight", pad_inches=0)
+        fig.savefig(
+            f"testout/{self.name}.svg",
+            dpi=1200,
+            transparant=True,
+            bbox_inches="tight",
+            pad_inches=0,
+        )
+        fig.savefig(
+            f"testout/{self.name}.png",
+            dpi=1200,
+            transparant=True,
+            bbox_inches="tight",
+            pad_inches=0,
+        )
