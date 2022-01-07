@@ -10,8 +10,8 @@ MAX_READ_SIZE_BYTES = 1024 * 1024
 
 
 @unique
-class SchematicRecord(IntEnum):
-    """These types are stored"""
+class SchematicRecordType(IntEnum):
+    """These types are stored in a schematic file."""
 
     UNDEFINED = 0
     COMPONENT = 1
@@ -49,10 +49,24 @@ class SchematicRecord(IntEnum):
     IMPLEMENTATION_LIST = 44
 
 
+@unique
+class SchematicPinType(IntEnum):
+    """Possible types for a pin."""
+
+    INPUT = 0
+    IO = 1
+    OUTPUT = 2
+    OPEN_COLLECTOR = 3
+    PASSIVE = 4
+    HIGH_Z = 5
+    OPEN_EMITTER = 6
+    POWER = 7
+
+
 def get_sch_record(value: Union[str, int]):
     try:
         if isinstance(value, str):
-            return SchematicRecord(int(value))
-        return SchematicRecord(value)
+            return SchematicRecordType(int(value))
+        return SchematicRecordType(value)
     except ValueError:
-        return SchematicRecord(0)
+        return SchematicRecordType(0)

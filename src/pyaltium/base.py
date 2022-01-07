@@ -12,7 +12,7 @@ import olefile
 
 from pyaltium.exceptions import PyAltiumError
 from pyaltium.helpers import read_decode_stream
-from pyaltium.magicstrings import MAX_READ_SIZE_BYTES, SchematicRecord
+from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
 
 
 class OleMixin:
@@ -125,30 +125,4 @@ class AltiumLibraryItemType(OleMixin):
         self._draw(ax)
         ax.axis("off")
         ax.autoscale(tight=True)
-        plt.show()
         fig.savefig(f"testout/{self.name}", bbox_inches="tight", pad_inches=0)
-
-
-def handle_allpins_obj(s: str):
-    count = int(s[0])
-    s = s[1:]
-    pins = s.split("&&&&")
-    pass
-    print("h")
-    # bytes(pins[0], encoding="raw_unicode_escape").hex()
-    # hx=[bytes(p, encoding="raw_unicode_escape").hex(' ',4) for p in pins]
-
-
-class ObjectRecord:
-    """An object record stored in a schematic."""
-
-    def __init__(self, record_type: SchematicRecord, parameters: dict) -> None:
-        self.record_type = record_type
-        self.parameters = parameters
-
-        pins = self.parameters.get("AllPinCount")
-        if pins:
-            handle_allpins_obj(pins)
-
-    def __repr__(self) -> str:
-        return f"<ObjectRecord> {self.record_type.name}"

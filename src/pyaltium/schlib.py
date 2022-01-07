@@ -1,22 +1,17 @@
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-from pyaltium.base import (
-    AltiumLibraryItemType,
-    AltiumLibraryType,
-    ObjectRecord,
-    SchematicRecord,
-)
+from pyaltium.base import AltiumLibraryItemType, AltiumLibraryType
 from pyaltium.helpers import (
     altium_string_split,
     altium_value_from_key,
     eval_bool,
     eval_color,
     re_before_first_record,
-    re_split_exclude_ampersand,
     sch_sectionkeys_to_dict,
 )
-from pyaltium.magicstrings import SCHLIB_HEADER, SchematicRecord, get_sch_record
+from pyaltium.magicstrings import SCHLIB_HEADER, SchematicRecordType, get_sch_record
+from pyaltium.schematichelpers import handle_pin_records
 
 
 class SchLib(AltiumLibraryType):
@@ -93,29 +88,34 @@ class SchLibItem(AltiumLibraryItemType):
         pin_text_data = self._read_decode_stream(
             (self.sectionkey, "PinTextData"), decode=False
         )
-        data = self._read_decode_stream((self.sectionkey, "Data"))
+        data = self._read_decode_stream((self.sectionkey, "Data"), decode=False)
 
         # Remove everything before the first "|RECORD"
-        data = re_before_first_record.sub("|RECORD", data)
+        while not data.startswith(b"|RECORD"):
+            data = data[1:]
 
         # Split into records
-        records = [f"|RECORD{d}" for d in data.split("|RECORD")[1:]]
+        records = [b"|RECORD" + d for d in data.split(b"|RECORD")[1:]]
 
-        # Split these into their parameters
+        # Split these into their parameters. We need to temporarily escape the
+        # |&| that is sometimes used.
         records = [
             dict(
-                s.split("=")
-                for s in rec.replace("|&|", "&&&&").split("|")[1:]
-                if len(s.split("=")) > 1
+                split
+                for s in rec.replace(b"|&|", b"&&&&").split(b"|")[1:]
+                if len(split := s.replace(b"&&&&", b"|&|").split(b"=", 1)) == 2
             )
             for rec in records
         ]
 
+        print(f"Processing {self.name}")
+        records = handle_pin_records(records)
+
+        # Result is something like
+        # [{"RECORD": "34", "Location.X": "-5", "Location.Y": "10",...},...]
+
         # Turn it into a list of objects
-        records = [
-            ObjectRecord(get_sch_record(rec.get("RECORD", 0)), rec) for rec in records
-        ]
-        print(records)
+        records = [SchematicRecord(rec) for rec in records]
 
         self._loaded_data = records
 
@@ -133,7 +133,7 @@ class SchLibItem(AltiumLibraryItemType):
                 if display_mode != part_display_mode:
                     continue
 
-                if typ == SchematicRecord.RECTANGLE:
+                if typ == SchematicRecordType.RECTANGLE:
                     bl_x = float(params.get("Location.X", 0))
                     bl_y = float(params.get("Location.Y", 0))
                     tr_x = float(params.get("Corner.X", 0))
@@ -169,3 +169,29 @@ class SchLibItem(AltiumLibraryItemType):
             "partcount": self.partcount,
             "sectionkey": self.sectionkey,
         }
+
+    def __repr__(self) -> str:
+        return f"<SchLibItem> {self.name}"
+
+
+class SchematicRecord:
+    """An object record stored in a schematic."""
+
+    def __init__(self, parameters: dict) -> None:
+        self.record_type = get_sch_record(parameters.get("RECORD", 0))
+        self.parameters = parameters
+
+        pins = self.parameters.get("AllPinCount")
+        if pins:
+            pass
+            # handle_allpins_obj(pins)
+
+    def draw(self, ax: plt.Axes) -> None:
+        """Draw this single object on matplotlib axes."""
+
+    def __repr__(self) -> str:
+        return f"<SchematicRecord> {self.record_type.name}"
+
+
+# bytes(pins[0], encoding="raw_unicode_escape").hex()
+# hx=[bytes(p, encoding="raw_unicode_escape").hex(' ',4) for p in pins]
