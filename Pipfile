@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 olefile = "*"
 matplotlib = "*"
+pyaltium = {editable = true, path = "."}
 
 [dev-packages]
 black = "*"
@@ -18,7 +19,6 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 flake8 = "*"
 flake8-bugbear = "*"
-pyaltium = {editable = true, path = "."}
 tox-pipenv = "*"
 
 [requires]
