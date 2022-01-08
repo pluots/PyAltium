@@ -1,6 +1,10 @@
 Installation & Contributing
 ===========================
 
+Installation
+~~~~~~~~~~~~
+
+
 Installation is as simple as you'd expect. Everyone should be
 using pipenv (that statement is somewhere between opinion and fact)
 so we recommend it for all your packages, though it makes no
