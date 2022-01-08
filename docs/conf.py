@@ -6,6 +6,8 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import re
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -15,7 +17,10 @@
 # sys.path.insert(0, os.path.abspath('.'))
 import sphinx_rtd_theme  # noqa: F401
 
-from src.pyaltium import __version__
+with open("src/pyaltium/__init__.py") as f:
+    txt = f.read()
+    r = re.search(r'__version__\s+=\s+"(.*)"', txt)
+    __version__ = r.group(1)
 
 # -- Project information -----------------------------------------------------
 
