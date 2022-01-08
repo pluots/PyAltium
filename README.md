@@ -22,7 +22,7 @@ print(SchLib.list_items())
 
 ```
 
-Returns 
+Returns
 
 ```JSON
 [

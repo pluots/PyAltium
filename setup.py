@@ -1,9 +1,16 @@
+import re
+
 import setuptools
 
-from pyaltium import __version__
+# from .src.pyaltium import __version__
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+with open("src/pyaltium/__init__.py") as f:
+    txt = f.read()
+    r = re.search(r'__version__\s+=\s+"(.*)"', txt)
+    __version__ = r.group(1)
+
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
 
 setuptools.setup(
     name="PyAltium",
