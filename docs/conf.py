@@ -15,7 +15,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 import sphinx_rtd_theme  # noqa: F401
 
-from pyaltium import __version__
+from src.pyaltium import __version__
 
 # -- Project information -----------------------------------------------------
 

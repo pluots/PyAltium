@@ -19,6 +19,7 @@ sphinx-rtd-theme = "*"
 flake8 = "*"
 flake8-bugbear = "*"
 pyaltium = {editable = true, path = "."}
+tox-pipenv = "*"
 
 [requires]
 python_version = "3.10"
