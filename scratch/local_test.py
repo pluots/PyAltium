@@ -6,7 +6,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 # Quick schlib test
-sl = SchLib("test/files/SchLib1.SchLib")
+sl = SchLib("tests/files/SchLib1.SchLib")
 # pp.pprint(sl.list_items(as_dict=True))
 
 for item in sl.items_list:
@@ -16,5 +16,5 @@ for item in sl.items_list:
 
 
 # Quick PCBLib test
-pl = PcbLib("test/files/PcbLib1.PcbLib")
+pl = PcbLib("tests/files/PcbLib1.PcbLib")
 # pp.pprint(pl.list_items(as_dict=True))

@@ -13,6 +13,8 @@ isort = "*"
 pytest = "*"
 pyaltium = {editable = true, path = "."}
 pylint = "*"
+tox = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.10"
