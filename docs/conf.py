@@ -17,7 +17,7 @@ import re
 # sys.path.insert(0, os.path.abspath('.'))
 import sphinx_rtd_theme  # noqa: F401
 
-with open("src/pyaltium/__init__.py") as f:
+with open("../src/pyaltium/__init__.py") as f:
     txt = f.read()
     r = re.search(r'__version__\s+=\s+"(.*)"', txt)
     __version__ = r.group(1)
