@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "01ae8cedfe075c172a89628fc9bdbeb24900c5bd882d60ab3b61a21ccd0d0511"
+            "sha256": "5631a57812af0b30a38b0084bccff37c7ee25c07981de7365946d79413fc68c7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -694,6 +694,13 @@
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
             "version": "==2.27.1"
         },
+        "rstcheck": {
+            "hashes": [
+                "sha256:92c4f79256a54270e0402ba16a2f92d0b3c15c8f4410cb9c57127067c215741f"
+            ],
+            "index": "pypi",
+            "version": "==3.3.1"
+        },
         "setuptools": {
             "hashes": [
                 "sha256:2404879cda71495fc4d5cbc445ed52fdaddf352b36e40be8dcc63147cb4edabe",
@@ -826,7 +833,7 @@
                 "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed",
                 "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
             "version": "==1.26.8"
         },
         "virtualenv": {
