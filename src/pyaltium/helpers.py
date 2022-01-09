@@ -19,7 +19,7 @@ def altium_string_split(s: str) -> list:
 
 
 def altium_value_from_key(arr: list, key: str) -> str:
-    """Loop through and replace "key" part."""
+    """Find a key in an altium string, return its value."""
     for item in arr:
         if item.startswith(key):
             return item.replace(f"{key}=", "")
@@ -99,3 +99,15 @@ def getfloat(params: dict, key: str, default: float = 0) -> float:
 
 def getint(params: dict, key: str, default: int = 0) -> int:
     return int(params.get(key, default))
+
+
+def byte_arr_str(s: bytes, len_length: int = 1, endianness: str = "big") -> bytes:
+    """Get a string encoded in a byte array.
+
+    s is the string for data to be extracted from.
+    len_length is the length of the length indicator
+    at the start of the string."""
+    len_text = int.from_bytes(s[0:len_length], endianness)
+    text_end = len_length + len_text
+    text = s[len_length:text_end]
+    return text, s[text_end:]

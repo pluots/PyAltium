@@ -5,7 +5,7 @@ Everything needed to interact with SchLib files
 """
 
 
-from typing import Iterable, Union
+from typing import Generic, Iterable, List, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import olefile
@@ -16,10 +16,11 @@ from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
 
 
 class OleMixin:
-    """Helper functions for anything with an ole _file_name object."""
+    """Helper functions for anything with an ole file_name object."""
 
     def _list_storages(self):
-        with olefile.OleFileIO(self._file_name) as ole:
+        """List all storages (directories) in the olefile"""
+        with olefile.OleFileIO(self.file_name) as ole:
             return ole.listdir()
 
     def _read_decode_stream(
@@ -29,7 +30,7 @@ class OleMixin:
         decode: str = "utf8",
     ) -> str:
         """Read a stream (in one go) and decode it. Maybe add yield in the future."""
-        with olefile.OleFileIO(self._file_name) as ole:
+        with olefile.OleFileIO(self.file_name) as ole:
             try:
                 str_read = ole.openstream(streamname).read(readbytes)
                 if decode:
@@ -40,29 +41,30 @@ class OleMixin:
                 return "" if decode else b""
 
 
-class AltiumFileType(OleMixin):
+class AltiumFileMixin(OleMixin):
     """This class will generally not be exposed.
     Just intended to set up children
     """
 
-    def __init__(self, file_name: str = None) -> None:
-        # Initialize variables to be used later
-        self._file_name = None
+    def __init__(self, file_name: str = None, lazyload: bool = False) -> None:
+        """Initialize variables to be used later"""
+        self.file_name = None
         self._header_dict = {}
         self._section_keys_list = []
         self.items_list = []
+        self.lazyload = lazyload
 
         if file_name is not None:
-            self.set_file_name(file_name)
+            self.setfile_name(file_name)
 
     def __repr__(self):
-        return self._file_name
+        return f"AltiumFileMixin({self.file_name})"
 
-    def set_file_name(self, file_name: str) -> None:
+    def setfile_name(self, file_name: str) -> None:
         """Check if file is valid (to the best of our ability) then update
         generic information.
         """
-        self._file_name = file_name
+        self.file_name = file_name
 
         if not olefile.isOleFile(file_name):
             raise PyAltiumError("Unable to open file. Is it actually an Altium binary?")
@@ -86,8 +88,15 @@ class AltiumFileType(OleMixin):
         raise NotImplementedError()
 
 
-class AltiumLibraryType(AltiumFileType):
-    def list_items(self, as_dict=True) -> list:
+LibItemType = TypeVar("LibItemType")
+
+
+class AltiumLibMixin(AltiumFileMixin, Generic[LibItemType]):
+    """An item in a library.
+
+    Library items should be able to load themselves from a file."""
+
+    def list_items(self, as_dict=True) -> list[LibItemType]:
         """Return a list of all the items.
 
         Optionally return them as a dictionary."""
@@ -98,32 +107,45 @@ class AltiumLibraryType(AltiumFileType):
         return [item.as_dict() for item in self.items_list]
 
 
-class AltiumLibraryItemType(OleMixin):
+RecordType = TypeVar("RecordType")
+
+
+class AltiumLibItemMixin(OleMixin, Generic[RecordType]):
+    """Single item in a library."""
+
     def __init__(self) -> None:
-        self._loaded_data = None
-        self.name = None
+        self._records = None
 
-    def _as_dict(self) -> dict:
+    def as_dict(self) -> dict:
         raise NotImplementedError
 
-    def _run_load(self) -> None:
-        """Set self._storage as needed."""
-        raise NotImplementedError
-
-    def _load(self) -> None:
+    def _load_data(self) -> None:
         """Load data from the owner file."""
-        if self._loaded_data is not None:
-            return
-        self._run_load()
+        raise NotImplementedError
 
-    def _draw(self, ax: plt.Axes) -> None:
+    @property
+    def records(self) -> List[RecordType]:
+        """Load data if it hasn't been loaded yet. If it has, return it."""
+        if self._records is None:
+            self._load_data()
+        return self._records
+
+    @property
+    def name(self) -> str:
+        return self.get_name()
+
+    def get_name(self) -> str:
+        """Override with the method to get the library item's name."""
+        raise NotImplementedError
+
+    def draw(self, ax: plt.Axes) -> None:
+        """Draw self on a canvas."""
         raise NotImplementedError
 
     def get_svg(self):
-        self._load()
         fig, ax = plt.subplots()
         ax.set_aspect("equal")
-        self._draw(ax)
+        self.draw(ax)
         ax.axis("off")
         ax.autoscale(tight=True)
         fig.savefig(

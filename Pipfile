@@ -19,7 +19,6 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 flake8 = "*"
 flake8-bugbear = "*"
-tox-pipenv = "*"
 rstcheck = "*"
 
 [requires]

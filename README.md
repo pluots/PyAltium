@@ -5,6 +5,7 @@ A tool to process Altium file types. Currently only supports reading of .SchLib 
 ## Information & Usage
 
 ### SchLib
+
 Currently the only schematic library capability is creating a list of
 library items, with some details
 
@@ -17,7 +18,7 @@ from pyaltium import SchLib
 # Set up our pretty printer so our output is understandable
 pp = pprint.PrettyPrinter(indent=4)
 
-sl = SchLib('my_file_name.SchLib')
+sl = SchLib('myfile_name.SchLib')
 print(SchLib.list_items())
 
 ```
@@ -36,6 +37,7 @@ Returns
 ```
 
 ### PCBLib
+
 Currently the only PCB library capability is creating a list of footprints
 
 Sample usage:
@@ -47,7 +49,7 @@ from pyaltium import SchLib
 # Set up our pretty printer so our output is understandable
 pp = pprint.PrettyPrinter(indent=4)
 
-sl = SchLib('my_file_name.SchLib')
+sl = SchLib('myfile_name.SchLib')
 print(SchLib.list_items())
 
 ```
