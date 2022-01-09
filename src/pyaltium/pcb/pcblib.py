@@ -14,11 +14,11 @@ class PcbLib(AltiumLibMixin):
         return PCBLIB_HEADER in fh_str
 
     def _update_header_and_section_keys(self) -> None:
-        """Just update class's _header_dict object"""
+        """Just update class's _header_keys_list object"""
         fh_str = self._read_decode_stream("FileHeader")
         sk_str = self._read_decode_stream("SectionKeys")
 
-        self._header_dict = altium_string_split(fh_str)
+        self._header_keys_list = altium_string_split(fh_str)
         self._section_keys_list = altium_string_split(sk_str)
 
     def _update_item_list(self) -> None:

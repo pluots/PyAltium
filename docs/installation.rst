@@ -6,13 +6,17 @@ Installation
 
 
 Installation is as simple as you'd expect. Everyone should be
-using pipenv (that statement is somewhere between opinion and fact)
+using pipenv or poetry (that statement is somewhere between opinion and fact)
 so we recommend it for all your packages, though it makes no
 difference:
 
 .. code-block:: bash
 
   $ pipenv install pyaltium
+
+.. code-block:: bash
+
+  $ poetry add pyaltium
 
 Or for pip:
 

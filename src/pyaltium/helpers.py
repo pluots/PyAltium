@@ -1,6 +1,6 @@
 """helpers.py"""
 import re
-from typing import Any
+from typing import Any, AnyStr, Literal, Tuple, Union
 
 import olefile
 
@@ -13,9 +13,10 @@ re_cleanstr = re.compile(r"[^\w_\.]")
 re_split_exclude_ampersand = re.compile(r"\|(?<!\|&)")
 
 
-def altium_string_split(s: str) -> list:
+def altium_string_split(s: AnyStr) -> list:
     """Just split into a list by the pipe character"""
-    return s.split("|")
+    split = "|" if isinstance(s, str) else b"|"
+    return s.split(split)
 
 
 def altium_value_from_key(arr: list, key: str) -> str:
@@ -37,14 +38,14 @@ def sch_sectionkeys_to_dict(arr: list) -> dict:
     }
     """
     key_count = altium_value_from_key(arr, "KeyCount")
-    if key_count == "":
-        key_count = 0
-    else:
-        key_count = int(key_count)
+    if len(key_count) == 0:
+        key_count = "0"
+
+    key_count_int = int(key_count)
 
     retdict = {}
 
-    for i in range(0, key_count - 1):
+    for i in range(0, key_count_int - 1):
         retdict[altium_value_from_key(arr, f"LibRef{str(i)}")] = altium_value_from_key(
             arr, f"SectionKey{str(i)}"
         )
@@ -101,7 +102,9 @@ def getint(params: dict, key: str, default: int = 0) -> int:
     return int(params.get(key, default))
 
 
-def byte_arr_str(s: bytes, len_length: int = 1, endianness: str = "big") -> bytes:
+def byte_arr_str(
+    s: bytes, len_length: int = 1, endianness: Literal["little", "big"] = "big"
+) -> Tuple[bytes, bytes]:
     """Get a string encoded in a byte array.
 
     s is the string for data to be extracted from.

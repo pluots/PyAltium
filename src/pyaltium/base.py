@@ -18,6 +18,9 @@ from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
 class OleMixin:
     """Helper functions for anything with an ole file_name object."""
 
+    def __init__(self) -> None:
+        self.file_name = ""
+
     def _list_storages(self):
         """List all storages (directories) in the olefile"""
         with olefile.OleFileIO(self.file_name) as ole:
@@ -28,7 +31,7 @@ class OleMixin:
         streamname: Union[str, Iterable],
         readbytes: int = MAX_READ_SIZE_BYTES,
         decode: str = "utf8",
-    ) -> str:
+    ) -> Union[str, bytes]:
         """Read a stream (in one go) and decode it. Maybe add yield in the future."""
         with olefile.OleFileIO(self.file_name) as ole:
             try:
@@ -48,10 +51,9 @@ class AltiumFileMixin(OleMixin):
 
     def __init__(self, file_name: str = None, lazyload: bool = False) -> None:
         """Initialize variables to be used later"""
-        self.file_name = None
-        self._header_dict = {}
-        self._section_keys_list = []
-        self.items_list = []
+        self.file_name = ""
+        self._header_keys_list: List[bytes] = []
+        self._section_keys_list: List[bytes] = []
         self.lazyload = lazyload
 
         if file_name is not None:
@@ -76,7 +78,7 @@ class AltiumFileMixin(OleMixin):
         self._update_item_list()
 
     def _update_header_and_section_keys(self) -> None:
-        """Just update class's _header_dict object."""
+        """Just update class's _header_keys_list object."""
         raise NotImplementedError()
 
     def _update_item_list(self) -> None:
@@ -96,6 +98,10 @@ class AltiumLibMixin(AltiumFileMixin, Generic[LibItemType]):
 
     Library items should be able to load themselves from a file."""
 
+    def __init__(self, file_name: str = None, lazyload: bool = False) -> None:
+        self.items_list: List[LibItemType] = []
+        super().__init__(file_name=file_name, lazyload=lazyload)
+
     def list_items(self, as_dict=True) -> list[LibItemType]:
         """Return a list of all the items.
 
@@ -114,7 +120,7 @@ class AltiumLibItemMixin(OleMixin, Generic[RecordType]):
     """Single item in a library."""
 
     def __init__(self) -> None:
-        self._records = None
+        self._records: List[RecordType] = []
 
     def as_dict(self) -> dict:
         raise NotImplementedError
