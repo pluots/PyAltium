@@ -1,7 +1,6 @@
-"""
-types.py
+"""base.py
 
-Everything needed to interact with SchLib files
+Baase classes for everything we do
 """
 
 

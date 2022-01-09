@@ -86,7 +86,7 @@ def pinstr_to_records(s: bytes) -> List[dict]:
 
             record["Hide_Designator"] = bool(rot_hide & 0x08)
             record["Hide_Name"] = bool(rot_hide & 0x10)
-            record["PinLength"] = int.from_bytes(s[3:4], "big")
+            record["PinLength"] = int.from_bytes(s[3:4], "big") * 10
             record["Location.X"] = int.from_bytes(s[4:6], "big", signed=True)
             record["Location.Y"] = int.from_bytes(s[6:8], "big", signed=True)
 

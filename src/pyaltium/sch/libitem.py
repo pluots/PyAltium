@@ -2,7 +2,11 @@ import matplotlib.pyplot as plt
 
 from pyaltium.base import AltiumLibItemMixin
 from pyaltium.magicstrings import SCHLIB_HEADER
-from pyaltium.sch.libitemrecord import SchLibItemRecord, handle_pin_records
+from pyaltium.sch.libitemrecord import (
+    SchLibItemRecord,
+    get_sch_lib_item_record,
+    handle_pin_records,
+)
 
 
 class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
@@ -48,7 +52,7 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
 
         # Split these into their parameters. We need to temporarily escape the
         # |&| that is sometimes used.
-        record_params: list[dict] = [
+        record_params_list: list[dict] = [
             dict(
                 split
                 for s in rec.replace(b"|&|", b"&&&&").split(b"|")[1:]
@@ -57,9 +61,9 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
             for rec in records
         ]
 
-        record_params = handle_pin_records(record_params)
+        record_params_list = handle_pin_records(record_params_list)
 
-        self._records = [SchLibItemRecord(recp) for recp in record_params]
+        self._records = [get_sch_lib_item_record(rp) for rp in record_params_list]
 
     def draw(self, ax: plt.Axes) -> None:
         """Create the drawing on the axes"""

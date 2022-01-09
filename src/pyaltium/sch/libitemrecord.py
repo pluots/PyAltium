@@ -1,18 +1,11 @@
 import math
-from typing import Iterable, Union
+from typing import Dict, Iterable, List, TypeVar, Union
 
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-from pyaltium.helpers import eval_bool, eval_color, getfloat, getint, normalize_dict
+from pyaltium.helpers import eval_bool, eval_color, normalize_dict
 from pyaltium.sch.helpers import SchLibItemRecordType, SchPinType, pinstr_to_records
-
-
-def get_sch_record_type(value: Union[str, int]):
-    try:
-        return SchLibItemRecordType(int(value))
-    except ValueError:
-        return SchLibItemRecordType(0)
 
 
 def handle_pin_records(records: Iterable[dict]) -> list:
@@ -52,87 +45,134 @@ def handle_pin_records(records: Iterable[dict]) -> list:
 class SchLibItemRecord:
     """An object record stored in a schematic."""
 
+    rtype: SchLibItemRecordType
+
     def __init__(
         self,
         parameters: dict,
     ) -> None:
-        self.parameters = normalize_dict(parameters)
-        self.record_type = get_sch_record_type(self.parameters.get("RECORD", 0))
+        self.param_dict = normalize_dict(parameters)
+        self._load_basic_types()
+        self._load()
+
+    def _load_basic_types(self) -> None:
+        self.loc_x = self.param_dict.get("Location.X", 0)
+        self.loc_y = self.param_dict.get("Location.Y", 0)
+        self.rotation = self.param_dict.get("Rotation", 0)
+        self.linewidth = self.param_dict.get("LineWidth", 0.4) * 10
+        self.color = eval_color(self.param_dict.get("Color", 0x000000))
+        self.display_mode = int(self.param_dict.get("OwnerPartDisplayMode", 1))
+        self.part_id = self.param_dict.get("OwnerPartID", 1)
+
+    def _load(self) -> None:
+        raise NotImplementedError
+
+    def _draw(self, ax: plt.Axes) -> None:
+        raise NotImplementedError
 
     def draw(self, ax: plt.Axes, part_display_mode: int = 1) -> None:
         """Draw this single object on matplotlib axes."""
-        typ = self.record_type
-        params = self.parameters
+        if self.display_mode != part_display_mode:
+            return
 
-        try:
-            display_mode = int(params.get("OwnerPartDisplayMode", 1))
-            part_id = params.get("OwnerPartID", 1)
-
-            if display_mode != part_display_mode:
-                return
-
-            loc_x = getint(params, "Location.X")
-            loc_y = getint(params, "Location.Y")
-            rotation = getint(params, "Rotation")
-            linewidth = getfloat(params, "LineWidth", 0.4) * 10
-            color = eval_color(params.get("Color"))
-
-            if typ == SchLibItemRecordType.RECTANGLE:
-                tr_x = getint(params, "Corner.X")
-                tr_y = getint(params, "Corner.Y")
-                is_solid = eval_bool(params.get("IsSolid", "1"))
-                fill_color = eval_color(params.get("AreaColor"))
-
-                fill_color = fill_color if is_solid else "none"
-                print(f"RECT {(loc_x, loc_y)} {(tr_x - loc_x,tr_y - loc_y)}")
-                rect = patches.Rectangle(
-                    (loc_x, loc_y),
-                    width=tr_x - loc_x,
-                    height=tr_y - loc_y,
-                    linewidth=linewidth,
-                    edgecolor=color,
-                    facecolor=fill_color,
-                )
-                ax.add_patch(rect)
-
-            elif typ == SchLibItemRecordType.PIN:
-                pinlength = getint(params, "PinLength")
-                print(f"PIN {(loc_x, loc_y)} {pinlength}")
-                x1 = loc_x + math.cos(math.radians(rotation)) * pinlength
-                y1 = loc_y + math.sin(math.radians(rotation)) * pinlength
-                ax.plot((loc_x, x1), (loc_y, y1), "k", linewidth=linewidth)
-
-            elif typ == SchLibItemRecordType.LABEL:
-                just = getint(params, "Justification", 0)
-                justMap = {
-                    0: ("bottom", "left"),
-                    1: ("bottom", "center"),
-                    2: ("bottom", "right"),
-                    3: ("center", "left"),
-                    4: ("center", "center"),
-                    5: ("center", "right"),
-                    6: ("top", "left"),
-                    7: ("top", "center"),
-                    8: ("top", "right"),
-                }
-                jm = justMap[just]
-                ax.text(
-                    loc_x,
-                    loc_y,
-                    params.get("Text", ""),
-                    color=color,
-                    verticalalignment=jm[0],
-                    horizontalalignment=jm[1],
-                )
-
-            # else:
-            #     print(typ)
-
-            # elif record.record_type==SchLibItemRecord.
-
-        except KeyError:
-            # If we are missing a key, we wouldn't be able to draw properly
-            pass
+        return self._draw(ax)
 
     def __repr__(self) -> str:
-        return f"<SchLibItemRecord> {self.record_type.name}"
+        return f"<SchLibItemRecord> {self.rtype.name}"
+
+
+class SLIRUndefined(SchLibItemRecord):
+    rtype = SchLibItemRecordType.UNDEFINED
+
+    def _load(self) -> None:
+        pass
+
+    def _draw(self, ax: plt.Axes) -> None:
+        pass
+
+
+class SLIRRectange(SchLibItemRecord):
+    rtype = SchLibItemRecordType.RECTANGLE
+
+    def _load(self) -> None:
+        self.tr_x = self.param_dict.get("Corner.X", 0)
+        self.tr_y = self.param_dict.get("Corner.Y", 0)
+        self.is_solid = eval_bool(self.param_dict.get("IsSolid", "1"))
+        self.fill_color = eval_color(self.param_dict.get("AreaColor"))
+
+    def _draw(self, ax: plt.Axes) -> None:
+
+        fill_color = self.fill_color if self.is_solid else "none"
+        print(
+            f"RECT {(self.loc_x, self.loc_y)} {(self.tr_x - self.loc_x,self.tr_y - self.loc_y)}"
+        )
+        rect = patches.Rectangle(
+            (self.loc_x, self.loc_y),
+            width=self.tr_x - self.loc_x,
+            height=self.tr_y - self.loc_y,
+            linewidth=self.linewidth,
+            edgecolor=self.color,
+            facecolor=fill_color,
+        )
+        ax.add_patch(rect)
+
+
+class SLIRPin(SchLibItemRecord):
+    rtype = SchLibItemRecordType.PIN
+
+    def _load(self) -> None:
+        self.pinlength = self.param_dict.get("PinLength", 0)
+
+    def _draw(self, ax: plt.Axes) -> None:
+        print(f"PIN {(self.loc_x, self.loc_y)} {self.pinlength}")
+        x1 = self.loc_x + math.cos(math.radians(self.rotation)) * self.pinlength
+        y1 = self.loc_y + math.sin(math.radians(self.rotation)) * self.pinlength
+        ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=self.linewidth)
+
+
+class SLIRLabel(SchLibItemRecord):
+    rtype = SchLibItemRecordType.LABEL
+
+    def _load(self) -> None:
+        self.pinlength = self.param_dict.get("PinLength", 0)
+        just = self.param_dict.get("Justification", 0)
+        self.text = self.param_dict.get("Text", "")
+        justMap = {
+            0: ("bottom", "left"),
+            1: ("bottom", "center"),
+            2: ("bottom", "right"),
+            3: ("center", "left"),
+            4: ("center", "center"),
+            5: ("center", "right"),
+            6: ("top", "left"),
+            7: ("top", "center"),
+            8: ("top", "right"),
+        }
+        self.just = justMap[just]
+
+    def _draw(self, ax: plt.Axes) -> None:
+        ax.text(
+            self.loc_x,
+            self.loc_y,
+            self.text,
+            color=self.color,
+            verticalalignment=self.just[0],
+            horizontalalignment=self.just[1],
+        )
+
+
+SLIRType = TypeVar("SLIRType", bound=SchLibItemRecord)
+_record_type_list: List[SLIRType] = [SLIRUndefined, SLIRRectange, SLIRPin, SLIRLabel]
+record_types: Dict[SchLibItemRecordType, SchLibItemRecord] = {
+    rcls.rtype: rcls for rcls in _record_type_list
+}
+
+
+def get_sch_lib_item_record(record_params) -> SchLibItemRecord:
+    type_val = record_params.get("RECORD", 0)
+    try:
+        rtype = SchLibItemRecordType(int(type_val))
+    except ValueError:
+        rtype = SchLibItemRecordType(0)
+
+    return record_types[rtype]

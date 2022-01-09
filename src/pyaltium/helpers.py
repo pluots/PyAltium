@@ -1,6 +1,6 @@
 """helpers.py"""
 import re
-from typing import Any, AnyStr, Literal, Tuple, Union
+from typing import Any, AnyStr, Literal, Tuple
 
 import olefile
 
@@ -71,35 +71,44 @@ def eval_bool(b: str) -> bool:
     return b.lower() in ("1", "t", "true")
 
 
-def eval_color(c: str = None) -> str:
+def eval_color(c: int = None) -> str:
     """Fix the dumb color flip flop."""
     if not c:
         return "#FFFFFF"
-    ci = int(c)
-    r = ci & 0x0000FF
-    g = (ci & 0x00FF00) >> 8
-    b = (ci & 0xFF0000) >> 16
+    r = c & 0x0000FF
+    g = (c & 0x00FF00) >> 8
+    b = (c & 0xFF0000) >> 16
 
     return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def normalize_value(x: Any, key: bool = False):
+    """Handle a single value in a dict"""
+    if not isinstance(x, bytes):
+        return x
+    s = re_cleanstr.sub("", x.decode("utf8", "ignore"))
+
+    # Keys will always be strings, try to convert any values
+    if not key:
+        try:
+            return int(s)
+        except ValueError:
+            pass
+        try:
+            return float(s)
+        except ValueError:
+            pass
+    return s
 
 
 def normalize_dict(d: dict) -> dict:
     """Decode dictionary key/values and remove extra binary characters."""
 
-    def norm_value(x: Any):
-        if not isinstance(x, bytes):
-            return x
-        return re_cleanstr.sub("", x.decode("utf8", "ignore"))
-
-    return {norm_value(k): norm_value(v) for k, v in d.items() if k and v}
-
-
-def getfloat(params: dict, key: str, default: float = 0) -> float:
-    return float(params.get(key, default))
-
-
-def getint(params: dict, key: str, default: int = 0) -> int:
-    return int(params.get(key, default))
+    return {
+        normalize_value(k, key=True): normalize_value(v)
+        for k, v in d.items()
+        if k and v
+    }
 
 
 def byte_arr_str(
