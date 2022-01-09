@@ -78,7 +78,7 @@ class SchLibItemRecord:
         return self._draw(ax)
 
     def __repr__(self) -> str:
-        return f"<SchLibItemRecord> {self.rtype.name}"
+        return f"<{type(self).__name__} ({self.loc_x},{self.loc_y})"
 
 
 class SLIRUndefined(SchLibItemRecord):
@@ -169,10 +169,11 @@ record_types: Dict[SchLibItemRecordType, SchLibItemRecord] = {
 
 
 def get_sch_lib_item_record(record_params) -> SchLibItemRecord:
+    """Returns an instantiated SchLibItemRecord of the apropriate type."""
     type_val = record_params.get("RECORD", 0)
     try:
         rtype = SchLibItemRecordType(int(type_val))
     except ValueError:
         rtype = SchLibItemRecordType(0)
 
-    return record_types[rtype]
+    return record_types[rtype](record_params)

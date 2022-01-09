@@ -69,7 +69,7 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
         """Create the drawing on the axes"""
         part_display_mode = 1
         for record in self.records:
-            record.draw(ax, part_display_mode)
+            record.draw(ax=ax, part_display_mode=part_display_mode)
 
     def as_dict(self) -> dict:
         """Create a parsable dict."""

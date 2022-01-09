@@ -123,3 +123,7 @@ def byte_arr_str(
     text_end = len_length + len_text
     text = s[len_length:text_end]
     return text, s[text_end:]
+
+
+def mil_to_um(n):
+    pass
