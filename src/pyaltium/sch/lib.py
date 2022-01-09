@@ -3,7 +3,7 @@ import math
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-from pyaltium.base import AltiumLibItemMixin, AltiumLibMixin
+from pyaltium.base import AltiumLibMixin
 from pyaltium.helpers import (
     altium_string_split,
     altium_value_from_key,

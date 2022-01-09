@@ -5,7 +5,7 @@ Everything needed to interact with SchLib files
 """
 
 
-from typing import Generic, Iterable, List, TypeVar, Union
+from typing import AnyStr, Generic, Iterable, List, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import olefile
@@ -30,8 +30,8 @@ class OleMixin:
         self,
         streamname: Union[str, Iterable],
         readbytes: int = MAX_READ_SIZE_BYTES,
-        decode: str = "utf8",
-    ) -> Union[str, bytes]:
+        decode: Union[str, bool] = "utf8",
+    ) -> AnyStr:
         """Read a stream (in one go) and decode it. Maybe add yield in the future."""
         with olefile.OleFileIO(self.file_name) as ole:
             try:
@@ -138,11 +138,7 @@ class AltiumLibItemMixin(OleMixin, Generic[RecordType]):
 
     @property
     def name(self) -> str:
-        return self.get_name()
-
-    def get_name(self) -> str:
-        """Override with the method to get the library item's name."""
-        raise NotImplementedError
+        return str(self)
 
     def draw(self, ax: plt.Axes) -> None:
         """Draw self on a canvas."""

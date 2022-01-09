@@ -16,3 +16,9 @@ profile = "black"
 # warn_unused_configs = true
 # warn_unused_ignores = true
 files = "src"
+ignore_missing_imports = true
+
+# [mypy-olefile]
+
+# [mypy-matplotlib]
+# ignore_missing_imports = true

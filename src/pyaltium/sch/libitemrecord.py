@@ -59,8 +59,6 @@ class SchLibItemRecord:
         self.parameters = normalize_dict(parameters)
         self.record_type = get_sch_record_type(self.parameters.get("RECORD", 0))
 
-        records = handle_pin_records(records)
-
     def draw(self, ax: plt.Axes, part_display_mode: int = 1) -> None:
         """Draw this single object on matplotlib axes."""
         typ = self.record_type

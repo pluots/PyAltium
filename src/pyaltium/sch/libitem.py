@@ -32,7 +32,7 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
         if not self.lazyload:
             self._load_data()
 
-    def _load_data(self) -> list:
+    def _load_data(self) -> None:
         """Load this item's data to a list of SchLibItem records."""
         pin_text_data = self._read_decode_stream(
             (self.sectionkey, "PinTextData"), decode=False
@@ -48,7 +48,7 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
 
         # Split these into their parameters. We need to temporarily escape the
         # |&| that is sometimes used.
-        record_params = [
+        record_params: list[dict] = [
             dict(
                 split
                 for s in rec.replace(b"|&|", b"&&&&").split(b"|")[1:]
@@ -78,3 +78,6 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
 
     def __repr__(self) -> str:
         return f"<SchLibItem> {self.libref}"
+
+    def __str__(self) -> str:
+        return self.libref

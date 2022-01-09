@@ -1,11 +1,12 @@
 import olefile
 
-from pyaltium.base import AltiumLibItemMixin, AltiumLibMixin
+from pyaltium.base import AltiumLibMixin
 from pyaltium.helpers import altium_string_split, altium_value_from_key
 from pyaltium.magicstrings import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
+from pyaltium.pcb.libitem import PcbLibItem
 
 
-class PcbLib(AltiumLibMixin):
+class PcbLib(AltiumLibMixin[PcbLibItem]):
     """Main object to interact with PCBLib"""
 
     def _verify_file_type(self, fname: str) -> bool:
@@ -73,29 +74,3 @@ class PcbLib(AltiumLibMixin):
                         file_name=self.file_name,
                     )
                 )
-
-
-class PcbLibItem(AltiumLibItemMixin):
-    def __init__(
-        self,
-        footprintref: str,
-        description: str,
-        height: float,
-        file_name: str,
-    ) -> None:
-        super().__init__()
-        self.footprintref = footprintref
-        self.description = description
-        self.height = height
-        self.file_name = file_name
-
-    def _run_load(self) -> None:
-        raise NotImplementedError
-
-    def as_dict(self) -> dict:
-        """Create a parsable dict."""
-        return {
-            "footprintref": self.footprintref,
-            "description": self.description,
-            "height": self.height,
-        }

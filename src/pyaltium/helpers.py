@@ -71,9 +71,9 @@ def eval_bool(b: str) -> bool:
     return b.lower() in ("1", "t", "true")
 
 
-def eval_color(c: str) -> str:
+def eval_color(c: str = None) -> str:
     """Fix the dumb color flip flop."""
-    if c is None:
+    if not c:
         return "#FFFFFF"
     ci = int(c)
     r = ci & 0x0000FF

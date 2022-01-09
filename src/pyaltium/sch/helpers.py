@@ -1,5 +1,5 @@
 from enum import IntEnum, unique
-from typing import List
+from typing import Dict, List, Union
 
 from pyaltium.helpers import byte_arr_str
 
@@ -69,7 +69,9 @@ def pinstr_to_records(s: bytes) -> List[dict]:
             if not len(s) > 10:
                 break
 
-            record = {"RECORD": SchLibItemRecordType.PIN}
+            record: Dict[str, Union[bytes, int, SchLibItemRecordType]] = {
+                "RECORD": SchLibItemRecordType.PIN
+            }
             # Trim beginning of string
             s = s[17:]
             description, s = byte_arr_str(s)
