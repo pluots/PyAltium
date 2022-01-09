@@ -38,9 +38,6 @@ submit bugs or request features.
 .. * :ref:`search`
 
 
-
-
-
 License
 -------
 
