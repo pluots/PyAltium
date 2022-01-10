@@ -5,7 +5,7 @@ version: 2.1
 jobs:
     toxify:
         docker:
-            - image: python3.10:apline
+            - image: cimg/python:3.10.1
 
         steps:
             - checkout
