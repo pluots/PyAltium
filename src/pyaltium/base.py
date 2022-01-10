@@ -11,7 +11,7 @@ import olefile
 
 from pyaltium.exceptions import PyAltiumError
 from pyaltium.helpers import read_decode_stream
-from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
+from pyaltium.magic import MAX_READ_SIZE_BYTES
 
 
 class OleMixin:

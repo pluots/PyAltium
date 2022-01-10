@@ -9,7 +9,7 @@ from pyaltium.helpers import (
     altium_value_from_key,
     sch_sectionkeys_to_dict,
 )
-from pyaltium.magicstrings import SCHLIB_HEADER
+from pyaltium.magic import SCHLIB_HEADER
 from pyaltium.sch.libitem import SchLibItem
 
 
