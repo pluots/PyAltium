@@ -20,9 +20,9 @@ setuptools.setup(
     description="A package for reading Altium files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/tgross35/PyAltium",
+    url="https://github.com/pluots/PyAltium",
     project_urls={
-        "Bug Tracker": "https://github.com/tgross35/PyAltium/issues",
+        "Bug Tracker": "https://github.com/pluots/PyAltium/issues",
     },
     packages=setuptools.find_packages(where="src"),
     classifiers=[
