@@ -1,4 +1,6 @@
-"""magicstrings.py"""
+"""magic.py
+
+Magic strings & values for use throughout the package"""
 
 
 SCHLIB_HEADER = (

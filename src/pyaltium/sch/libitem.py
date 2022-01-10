@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from pyaltium.base import AltiumLibItemMixin
-from pyaltium.magicstrings import SCHLIB_HEADER
+from pyaltium.magic import SCHLIB_HEADER
 from pyaltium.sch.libitemrecord import (
     SchLibItemRecord,
     get_sch_lib_item_record,

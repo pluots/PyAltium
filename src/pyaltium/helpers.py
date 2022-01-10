@@ -4,7 +4,7 @@ from typing import Any, AnyStr, Literal, Tuple
 
 import olefile
 
-from pyaltium.magicstrings import MAX_READ_SIZE_BYTES
+from pyaltium.magic import MAX_READ_SIZE_BYTES
 
 re_before_first_record = re.compile(r"^.*?(\|RECORD)")
 re_cleanstr = re.compile(r"[^\w_\.]")

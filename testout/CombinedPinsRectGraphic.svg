@@ -21,32 +21,32 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 266.112 
-L 281.256585 266.112 
-L 281.256585 0 
-L 0 0 
+   <path d="M 0 266.112
+L 281.256585 266.112
+L 281.256585 0
+L 0 0
 z
 " style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="line2d_1">
-    <path d="M 108.17561 266.112 
-L -0 266.112 
+    <path d="M 108.17561 266.112
+L -0 266.112
 " clip-path="url(#pdf9d2a3b44)" style="fill: none; stroke: #000000; stroke-width: 4; stroke-linecap: square"/>
    </g>
    <g id="line2d_2">
-    <path d="M 108.17561 -0 
-L -0 -0 
+    <path d="M 108.17561 -0
+L -0 -0
 " clip-path="url(#pdf9d2a3b44)" style="fill: none; stroke: #000000; stroke-width: 4; stroke-linecap: square"/>
    </g>
    <g id="line2d_3">
-    <path d="M 173.080976 266.112 
-L 281.256585 266.112 
+    <path d="M 173.080976 266.112
+L 281.256585 266.112
 " clip-path="url(#pdf9d2a3b44)" style="fill: none; stroke: #000000; stroke-width: 4; stroke-linecap: square"/>
    </g>
    <g id="line2d_4">
-    <path d="M 173.080976 -0 
-L 281.256585 -0 
+    <path d="M 173.080976 -0
+L 281.256585 -0
 " clip-path="url(#pdf9d2a3b44)" style="fill: none; stroke: #000000; stroke-width: 4; stroke-linecap: square"/>
    </g>
   </g>

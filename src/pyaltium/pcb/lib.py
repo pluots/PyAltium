@@ -2,7 +2,7 @@ import olefile
 
 from pyaltium.base import AltiumLibMixin
 from pyaltium.helpers import altium_string_split, altium_value_from_key
-from pyaltium.magicstrings import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
+from pyaltium.magic import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
 from pyaltium.pcb.libitem import PcbLibItem
 
 
