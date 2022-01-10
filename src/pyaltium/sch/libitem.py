@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 
 from pyaltium.base import AltiumLibItemMixin
-from pyaltium.magic import SCHLIB_HEADER
 from pyaltium.sch.libitemrecord import (
     SchLibItemRecord,
     get_sch_lib_item_record,
@@ -38,9 +37,9 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
 
     def _load_data(self) -> None:
         """Load this item's data to a list of SchLibItem records."""
-        pin_text_data = self._read_decode_stream(
-            (self.sectionkey, "PinTextData"), decode=False
-        )
+        # pin_text_data = self._read_decode_stream(
+        #     (self.sectionkey, "PinTextData"), decode=False
+        # )
         data = self._read_decode_stream((self.sectionkey, "Data"), decode=False)
 
         # Remove everything before the first "|RECORD"

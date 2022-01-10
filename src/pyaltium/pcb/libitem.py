@@ -1,5 +1,3 @@
-import olefile
-
 from pyaltium.base import AltiumLibItemMixin
 
 

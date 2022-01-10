@@ -1,11 +1,11 @@
 import math
-from typing import Dict, Iterable, List, TypeVar, Union
+from typing import Dict, Iterable, List, TypeVar
 
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
 from pyaltium.helpers import eval_bool, eval_color, normalize_dict
-from pyaltium.sch.helpers import SchLibItemRecordType, SchPinType, pinstr_to_records
+from pyaltium.sch.helpers import SchLibItemRecordType, pinstr_to_records
 
 
 def handle_pin_records(records: Iterable[dict]) -> list:
@@ -104,7 +104,8 @@ class SLIRRectange(SchLibItemRecord):
 
         fill_color = self.fill_color if self.is_solid else "none"
         print(
-            f"RECT {(self.loc_x, self.loc_y)} {(self.tr_x - self.loc_x,self.tr_y - self.loc_y)}"
+            f"RECT {(self.loc_x, self.loc_y)} "
+            f"{(self.tr_x - self.loc_x,self.tr_y - self.loc_y)}"
         )
         rect = patches.Rectangle(
             (self.loc_x, self.loc_y),

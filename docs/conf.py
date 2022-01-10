@@ -69,7 +69,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {
-    "analytics_id": "G-XHHG392ZC1",  #  Provided by Google in your dashboard
+    "analytics_id": "G-XHHG392ZC1",  # Provided by Google in your dashboard
     # 'analytics_anonymize_ip': False,
     # 'prev_next_buttons_location': 'bottom',
     "style_external_links": True,

@@ -2,14 +2,37 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-orbs:
-    python: circleci/python@1.5.0
+jobs:
+    toxify:
+        docker:
+            - image: python3.10:apline
+
+        steps:
+            - checkout
+            - run: pip install tox
+            - run: tox
+
+            - store_artifacts:
+                  path: ./screenshots
+                  destination: screenshots-file
+
+            - store_artifacts:
+                  path: ./log
+                  destination: logs-file
 
 workflows:
-    mainwf:
+    version: 2
+    myproj:
         jobs:
-            - python/test:
-                  args: "--ignore-pipfile --dev --python 3.8"
-                  pkg-manager: pipenv
-                  test-tool: pytest
-                  version: "3.9"
+            - toxify
+# orbs:
+#     python: circleci/python@1.5.0
+
+# workflows:
+#     mainwf:
+#         jobs:
+#             - python/test:
+#                   args: "--ignore-pipfile --dev --python 3.8"
+#                   pkg-manager: pipenv
+#                   test-tool: pytest
+#                   version: "3.9"
