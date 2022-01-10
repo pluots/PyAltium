@@ -1,13 +1,11 @@
 # PyAltium
 
-A tool to process Altium file types. Currently only supports reading of .SchLib files.
+A tool to process Altium file types. Currently only supports reading of .SchLib and
+.PcbLib files.
 
-## Information & Usage
+See full documentation here: [pyaltium.readthedocs.io](pyaltium.readthedocs.io)
 
 ### SchLib
-
-Currently the only schematic library capability is creating a list of
-library items, with some details
 
 Sample usage:
 
