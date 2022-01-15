@@ -12,6 +12,7 @@ sl = SchLib("tests/files/SchLib1.SchLib")
 for item in sl.items_list:
     # if item.name == "Mixed with shape and text":
     #     continue
+    print(f'\nProducing {item.name}')
     item.get_svg()
 
 

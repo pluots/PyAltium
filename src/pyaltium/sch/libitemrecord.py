@@ -8,7 +8,7 @@ from pyaltium.helpers import eval_bool, eval_color, normalize_dict
 from pyaltium.sch.helpers import SchLibItemRecordType, pinstr_to_records
 
 
-def handle_pin_records(records: Iterable[dict]) -> list:
+def handle_pin_records(records: Iterable[Dict[bytes, bytes]]) -> list:
     """Run through a list of records for a schematic component and handle pins.
 
     Pins are a bit weird. There is no record type for them so they are just binary
@@ -18,25 +18,28 @@ def handle_pin_records(records: Iterable[dict]) -> list:
     since they just tag along with whatever record preceeded them.
     """
 
-    retlist = []
+    retlist: List[dict] = []
 
     for rec in records:
-        newrecords = []
+        newrecords: List[dict] = []
+        workingrec: Dict[str, bytes] = {}
+
         for key, val in rec.items():
             # If there is nothing bytes in the string, we are set
             if b"\x00" not in val:
+                workingrec[key.decode("utf8")] = val
                 continue
 
             # Otherwise, do cleanup
             newval, pinstr = val.split(b"\x00", 1)
-            rec[key] = newval
+            workingrec[key.decode("utf8")] = newval
 
             # If it's too short to be a pin, it's probably just junk so ignore
             if len(pinstr) > 20:
                 complete_str = b"\x00" + pinstr
                 newrecords.extend(pinstr_to_records(complete_str))
 
-        retlist.append(rec)
+        retlist.append(workingrec)
         retlist.extend(newrecords)
 
     return retlist
@@ -46,6 +49,7 @@ class SchLibItemRecord:
     """An object record stored in a schematic."""
 
     rtype: SchLibItemRecordType
+    param_dict: dict
 
     def __init__(
         self,
@@ -56,8 +60,8 @@ class SchLibItemRecord:
         self._load()
 
     def _load_basic_types(self) -> None:
-        self.loc_x = self.param_dict.get("Location.X", 0)
-        self.loc_y = self.param_dict.get("Location.Y", 0)
+        self.loc_x = self.param_dict.get("Location.X", 0) * 10
+        self.loc_y = self.param_dict.get("Location.Y", 0) * 10
         self.rotation = self.param_dict.get("Rotation", 0)
         self.linewidth = self.param_dict.get("LineWidth", 0.4) * 10
         self.color = eval_color(self.param_dict.get("Color", 0x000000))
@@ -101,7 +105,7 @@ class SLIRRectange(SchLibItemRecord):
         self.fill_color = eval_color(self.param_dict.get("AreaColor"))
 
     def _draw(self, ax: plt.Axes) -> None:
-
+        st = f"({self.loc_x}, {self.loc_y})"
         fill_color = self.fill_color if self.is_solid else "none"
         print(
             f"RECT {(self.loc_x, self.loc_y)} "
@@ -123,9 +127,13 @@ class SLIRPin(SchLibItemRecord):
 
     def _load(self) -> None:
         self.pinlength = self.param_dict.get("PinLength", 0)
+        self.name = self.param_dict.get("Name", 0)
+        self.designator = self.param_dict.get("Designator", 0)
+        self.pintype = self.param_dict.get("PinType", 0)
 
     def _draw(self, ax: plt.Axes) -> None:
-        print(f"PIN {(self.loc_x, self.loc_y)} {self.pinlength}")
+        st = f"({self.loc_x}, {self.loc_y})"
+        print(f"PIN {st: <20}{self.pinlength: <6} {self.name: <8} {self.designator}")
         x1 = self.loc_x + math.cos(math.radians(self.rotation)) * self.pinlength
         y1 = self.loc_y + math.sin(math.radians(self.rotation)) * self.pinlength
         ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=self.linewidth)
@@ -177,4 +185,6 @@ def get_sch_lib_item_record(record_params) -> SchLibItemRecord:
     except ValueError:
         rtype = SchLibItemRecordType(0)
 
-    return record_types[rtype](record_params)
+    if rtype in record_types:
+        return record_types[rtype](record_params)
+    return record_types[SchLibItemRecordType.UNDEFINED](record_params)

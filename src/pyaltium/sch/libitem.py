@@ -15,6 +15,13 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
     :type AltiumLibItemMixin: [type]
     """
 
+    libref: str
+    sectionkey: str
+    description: str
+    partcount: int
+    lazyload: bool
+    file_name: str
+
     def __init__(
         self,
         libref: str,
@@ -63,6 +70,7 @@ class SchLibItem(AltiumLibItemMixin[SchLibItemRecord]):
         record_params_list = handle_pin_records(record_params_list)
 
         self._records = [get_sch_lib_item_record(rp) for rp in record_params_list]
+        pass
 
     def draw(self, ax: plt.Axes) -> None:
         """Create the drawing on the axes"""

@@ -16,6 +16,8 @@ from pyaltium.magic import MAX_READ_SIZE_BYTES
 class OleMixin:
     """Helper functions for anything with an ole file_name object."""
 
+    file_name: str
+
     def __init__(self) -> None:
         self.file_name = ""
 
@@ -47,11 +49,15 @@ class AltiumFileMixin(OleMixin):
     Just intended to set up children
     """
 
+    _header_keys_list: List[bytes]
+    _section_keys_list: List[bytes]
+    lazyload: bool
+
     def __init__(self, file_name: str = None, lazyload: bool = False) -> None:
         """Initialize variables to be used later"""
         self.file_name = ""
-        self._header_keys_list: List[bytes] = []
-        self._section_keys_list: List[bytes] = []
+        self._header_keys_list = []
+        self._section_keys_list = []
         self.lazyload = lazyload
 
         if file_name is not None:
@@ -96,8 +102,10 @@ class AltiumLibMixin(AltiumFileMixin, Generic[LibItemType]):
 
     Library items should be able to load themselves from a file."""
 
+    items_list: List[LibItemType]
+
     def __init__(self, file_name: str = None, lazyload: bool = False) -> None:
-        self.items_list: List[LibItemType] = []
+        self.items_list = []
         super().__init__(file_name=file_name, lazyload=lazyload)
 
     def list_items(self, as_dict=True) -> list[LibItemType]:
@@ -117,8 +125,10 @@ RecordType = TypeVar("RecordType")
 class AltiumLibItemMixin(OleMixin, Generic[RecordType]):
     """Single item in a library."""
 
+    _records: List[RecordType]
+
     def __init__(self) -> None:
-        self._records: List[RecordType] = []
+        self._records = []
 
     def as_dict(self) -> dict:
         raise NotImplementedError
@@ -148,13 +158,13 @@ class AltiumLibItemMixin(OleMixin, Generic[RecordType]):
         self.draw(ax)
         ax.axis("off")
         ax.autoscale(tight=True)
-        fig.savefig(
-            f"testout/{self.name}.svg",
-            dpi=1200,
-            transparant=True,
-            bbox_inches="tight",
-            pad_inches=0,
-        )
+        # fig.savefig(
+        #     f"testout/{self.name}.svg",
+        #     dpi=1200,
+        #     transparant=True,
+        #     bbox_inches="tight",
+        #     pad_inches=0,
+        # )
         fig.savefig(
             f"testout/{self.name}.png",
             dpi=1200,
