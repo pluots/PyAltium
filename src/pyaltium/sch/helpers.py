@@ -74,16 +74,16 @@ def pinstr_worker(s_in: bytes) -> Tuple[PinRecType, str]:
     if description:
         record["Description"] = description
 
-    record["PinType"] = SchPinType(int.from_bytes(s[1:2], "big"))
+    record["PinType"] = SchPinType(int.from_bytes(s[1:2], "little"))
 
-    rot_hide = int.from_bytes(s[2:3], "big")
+    rot_hide = int.from_bytes(s[2:3], "little")
     record["Rotation"] = _rotations[rot_hide & 0x03]
-
     record["Hide_Designator"] = bool(rot_hide & 0x08)
     record["Hide_Name"] = bool(rot_hide & 0x10)
-    record["PinLength"] = int.from_bytes(s[3:4], "big") * 10
-    record["Location.X"] = int.from_bytes(s[4:6], "big", signed=True)
-    record["Location.Y"] = int.from_bytes(s[6:8], "big", signed=True)
+
+    record["PinLength"] = int.from_bytes(s[3:5], "little") * 10
+    record["Location.X"] = int.from_bytes(s[5:7], "little", signed=True)
+    record["Location.Y"] = int.from_bytes(s[7:9], "little", signed=True)
 
     s = s[13:]
     record["Name"], s = byte_arr_str(s)

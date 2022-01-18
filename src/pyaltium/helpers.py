@@ -112,7 +112,7 @@ def normalize_dict(d: dict) -> dict:
 
 
 def byte_arr_str(
-    s: bytes, len_length: int = 1, endianness: Literal["little", "big"] = "big"
+    s: bytes, len_length: int = 1, endianness: Literal["little", "big"] = "little"
 ) -> Tuple[bytes, bytes]:
     """Get a string encoded in a byte array.
 
@@ -122,7 +122,7 @@ def byte_arr_str(
     len_text = int.from_bytes(s[0:len_length], endianness)
     text_end = len_length + len_text
     text = s[len_length:text_end]
-    return text.decode('utf8'), s[text_end:]
+    return text.decode("utf8"), s[text_end:]
 
 
 def mil_to_um(n):

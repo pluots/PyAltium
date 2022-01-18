@@ -12,10 +12,10 @@ def test_byte_arr_str():
         "01",  # formal type
         "07",  # power type
         f"{0b10011:02x}",  # hidden des, 270 rotation
-        "32",  # len 500 (50)
-        "006e",  # x pos 110
-        "ffa6",  # y pos -900, (-90).to_bytes(2, "big", signed=True).hex()
-        "0000000000",  # unknown
+        "3200",  # len 500 (50)
+        "6e00",  # x pos 110
+        "a6ff",  # y pos -900, (-90).to_bytes(2, "little", signed=True).hex()
+        "00000000",  # unknown
         "0b",
         str("Pin () Name".encode("utf8").hex()),
         "06",

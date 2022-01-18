@@ -12,7 +12,7 @@ y: y size (16bit signed)
 See https://github.com/vadmium/python-altium/blob/master/format.md for further clarification
 
 0 1 2 3 4 5 6 7 8 9 A B C D E F 10 11 ...          0 1 2 3 4 5 6 7 8 9 A B C  D  ...                0  ...          0 1 2 3 4
-                      [opt c     ] sz [pin descr ] f-t-r-l-[x ][y ]           sz [name            ] sz [desig ]
+                      [opt c     ] sz [pin descr ] f-t-r-l-  [x ][y ]         sz [name            ] sz [desig ]
 0027000001020000000001000000000000 00              01073a0a000a00000000000000 04 [Pin1            ] 01 [1]          00037c267c
 0027000001020000000001000000000000 00              01073a0a000a00f6ff00000000 04 [Pin2            ] 01 [2]          00037c267c
 0027000001020000000001000000000000 00              0107380a004600000000000000 04 [Pin3            ] 01 [3]          00037c267c
