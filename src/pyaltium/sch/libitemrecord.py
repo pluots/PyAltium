@@ -133,10 +133,51 @@ class SLIRPin(SchLibItemRecord):
 
     def _draw(self, ax: plt.Axes) -> None:
         st = f"({self.loc_x}, {self.loc_y})"
-        print(f"PIN {st: <20}{self.pinlength: <6} {self.name: <8} {self.designator}")
-        x1 = self.loc_x + math.cos(math.radians(self.rotation)) * self.pinlength
-        y1 = self.loc_y + math.sin(math.radians(self.rotation)) * self.pinlength
-        ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=self.linewidth)
+        x1 = self.loc_x + int(math.cos(math.radians(self.rotation))) * self.pinlength
+        y1 = self.loc_y + int(math.sin(math.radians(self.rotation))) * self.pinlength
+        print(
+            f"PIN {st: <20} ({self.loc_x},{x1}) ({self.loc_y},{y1}) {self.name: <8} {self.designator}"
+        )
+        ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=10)
+        # ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=self.linewidth)
+
+        name_x = self.loc_x - int(math.cos(math.radians(self.rotation)) * 40)
+        name_y = self.loc_y - int(math.sin(math.radians(self.rotation)) * 40)
+        des_x = self.loc_x + int(math.cos(math.radians(self.rotation)) * 40)
+        des_y = self.loc_y + int(math.sin(math.radians(self.rotation)) * 40)
+
+        if self.rotation == 90:
+            nameprops = {"va": "top", "ha": "center"}
+            desprops = {"va": "bottom", "ha": "right"}
+        elif self.rotation == 180:
+            nameprops = {"va": "center", "ha": "left"}
+            desprops = {"va": "bottom", "ha": "right"}
+        elif self.rotation == 270:
+            nameprops = {"va": "bottom", "ha": "center"}
+            desprops = {"va": "top", "ha": "right"}
+        else:  # self.rotation == 0
+            nameprops = {"va": "center", "ha": "right"}
+            desprops = {"va": "bottom", "ha": "left"}
+
+        ax.text(
+            name_x,
+            name_y,
+            self.name,
+            nameprops,
+            color="black",
+            rotation=self.rotation % 180,
+            fontsize=24,
+        )
+
+        ax.text(
+            des_x,
+            des_y,
+            self.designator,
+            desprops,
+            color="black",
+            rotation=self.rotation % 180,
+            fontsize=24,
+        )
 
 
 class SLIRLabel(SchLibItemRecord):
@@ -160,6 +201,7 @@ class SLIRLabel(SchLibItemRecord):
         self.just = justMap[just]
 
     def _draw(self, ax: plt.Axes) -> None:
+        print(f"LABEL ({self.loc_x}, {self.loc_y}) {self.text: <8}")
         ax.text(
             self.loc_x,
             self.loc_y,
@@ -167,6 +209,7 @@ class SLIRLabel(SchLibItemRecord):
             color=self.color,
             verticalalignment=self.just[0],
             horizontalalignment=self.just[1],
+            fontsize=24,
         )
 
 
