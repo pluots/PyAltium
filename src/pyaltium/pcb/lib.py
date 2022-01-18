@@ -1,11 +1,12 @@
 import olefile
 
-from pyaltium.base import AltiumLibraryItemType, AltiumLibraryType
+from pyaltium.base import AltiumLibMixin
 from pyaltium.helpers import altium_string_split, altium_value_from_key
-from pyaltium.magicstrings import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
+from pyaltium.magic import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
+from pyaltium.pcb.libitem import PcbLibItem
 
 
-class PcbLib(AltiumLibraryType):
+class PcbLib(AltiumLibMixin[PcbLibItem]):
     """Main object to interact with PCBLib"""
 
     def _verify_file_type(self, fname: str) -> bool:
@@ -14,15 +15,15 @@ class PcbLib(AltiumLibraryType):
         return PCBLIB_HEADER in fh_str
 
     def _update_header_and_section_keys(self) -> None:
-        """Just update class's _header_dict object"""
+        """Just update class's _header_keys_list object"""
         fh_str = self._read_decode_stream("FileHeader")
         sk_str = self._read_decode_stream("SectionKeys")
 
-        self._header_dict = altium_string_split(fh_str)
+        self._header_keys_list = altium_string_split(fh_str)
         self._section_keys_list = altium_string_split(sk_str)
 
     def _update_item_list(self) -> None:
-        with olefile.OleFileIO(self._file_name) as ole:
+        with olefile.OleFileIO(self.file_name) as ole:
             # Just list storages. We will need to add something to integrate
             # SectionKeys at some point, but the PCBLib flavor of that
             # file makes 0 sense (yet)
@@ -70,32 +71,6 @@ class PcbLib(AltiumLibraryType):
                         footprintref=footprintref,
                         description=description,
                         height=height,
-                        parent_fname=self._file_name,
+                        file_name=self.file_name,
                     )
                 )
-
-
-class PcbLibItem(AltiumLibraryItemType):
-    def __init__(
-        self,
-        footprintref: str,
-        description: str,
-        height: float,
-        parent_fname: str,
-    ) -> None:
-        super().__init__()
-        self.footprintref = footprintref
-        self.description = description
-        self.height = height
-        self._file_name = parent_fname
-
-    def _run_load(self) -> None:
-        raise NotImplementedError
-
-    def as_dict(self) -> dict:
-        """Create a parsable dict."""
-        return {
-            "footprintref": self.footprintref,
-            "description": self.description,
-            "height": self.height,
-        }

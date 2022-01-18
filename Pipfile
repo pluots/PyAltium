@@ -6,13 +6,21 @@ name = "pypi"
 [packages]
 olefile = "*"
 matplotlib = "*"
+pyaltium = {editable = true, path = "."}
 
 [dev-packages]
 black = "*"
 isort = "*"
 pytest = "*"
-pyaltium = {editable = true, path = "."}
 pylint = "*"
+tox = "*"
+pre-commit = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+flake8 = "*"
+flake8-bugbear = "*"
+rstcheck = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.10"

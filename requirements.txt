@@ -1,0 +1,4 @@
+-i https://pypi.org/simple
+matplotlib==3.5.1
+numpy==1.22.0; python_version >= '3.8'
+olefile==0.46
