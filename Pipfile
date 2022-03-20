@@ -7,6 +7,7 @@ name = "pypi"
 olefile = "*"
 matplotlib = "*"
 pyaltium = {editable = true, path = "."}
+configparser = "*"
 
 [dev-packages]
 black = "*"
