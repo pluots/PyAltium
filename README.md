@@ -3,7 +3,7 @@
 A tool to process Altium file types. Currently only supports reading of .SchLib and
 .PcbLib files.
 
-See full documentation here: [pyaltium.readthedocs.io](pyaltium.readthedocs.io)
+See full documentation here: [pyaltium.readthedocs.io](http://pyaltium.readthedocs.io)
 
 ### SchLib
 
