@@ -1,7 +1,9 @@
 """helpers.py"""
 import re
+from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, AnyStr, Literal, Tuple, Union
+from uuid import UUID
 
 import olefile
 
@@ -133,8 +135,7 @@ def mil_to_um(n):
 
 
 def humanize(val: REALNUM, unit: str = "", space=True, trim=True, quantize=None) -> str:
-    def quant(x):
-        d = Decimal(x)
+    def quant(d):
         if trim:
             d = d.quantize(Decimal(1)) if d == d.to_integral() else d.normalize()
         if not quantize:
@@ -146,12 +147,54 @@ def humanize(val: REALNUM, unit: str = "", space=True, trim=True, quantize=None)
     else:
         space = ""
 
-    if val < 1e3:
+    val = Decimal(val)
+
+    if val < 1000:
         return f"{quant(val)}{space}{unit}"
-    if val < 1e6:
-        return f"{quant(val/1e3)}{space}k{unit}"
-    if val < 1e9:
-        return f"{quant(val/1e6)}{space}M{unit}"
-    if val < 1e12:
-        return f"{quant(val/1e9)}{space}G{unit}"
-    return f"{quant(val/1e12)}{space}T{unit}"
+    if val < 1000 ** 2:
+        return f"{quant(val/1000)}{space}k{unit}"
+    if val < 1000 ** 3:
+        return f"{quant(val/(1000**2))}{space}M{unit}"
+    if val < 1000 ** 4:
+        return f"{quant(val/(1000**3))}{space}G{unit}"
+    return f"{quant(val/(1000**4))}{space}T{unit}"
+
+
+def dehumanize(s: str, unit: str = "") -> Decimal:
+    res = re.search(r"(\d+\.?\d*)(\w*)", s)
+    num = res.group(1)
+    sfx = res.group(2)
+
+    sfx.strip()
+    if unit:
+        sfx = sfx.replace(unit, "")
+
+    d = Decimal(num)
+    if sfx.startswith("k"):
+        return d * 1000
+    if sfx.startswith("M"):
+        return d * 1000 ** 2
+    if sfx.startswith("G"):
+        return d * 1000 ** 3
+    if sfx.startswith("T"):
+        return d * 1000 ** 4
+    return d
+
+
+def safe_uuid(*args, ret="input", **kwargs):
+    """Return a UUID even when input is corruptable.
+
+    ret sets what to return when failed. "input" returns input as given."""
+    try:
+        return UUID(*args, **kwargs)
+    except (TypeError, ValueError):
+        if ret == "input":
+            if len(args) > 1:
+                return args[0]
+            return kwargs.get("int", kwargs.get("hex"))
+        return UUID(int=0)
+
+
+def load_dt(s: str):
+    s = s.replace("Z", "+00:00")
+    return datetime.fromisoformat(s.replace("Z", "+00:00"))

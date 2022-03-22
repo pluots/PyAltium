@@ -1,13 +1,13 @@
 """base.py
 
 Base matlib types not really meant for direct use outside of source."""
-import uuid
 import xml.etree.ElementTree as ET
 from dataclasses import KW_ONLY, dataclass, field
 from datetime import datetime
 from typing import Callable
+from uuid import UUID, uuid4
 
-from pyaltium.helpers import REALNUM, humanize
+from pyaltium.helpers import REALNUM, dehumanize, humanize, load_dt, safe_uuid
 from pyaltium.matlib.helpers import HEX_ALPHA_REGEX, MatLibTypeID
 
 
@@ -27,6 +27,8 @@ class MatProperty:
     attrib: dict[str, str] = field(default_factory=dict)
     validator: Callable = None
     validator_message: str = ""
+    atrset: str = ""
+    setproc: Callable = field(default=lambda x: x)
 
     def _get_xml(self):
         """Validate value then return an XML element."""
@@ -64,9 +66,24 @@ class MatLibEntity:
     """Base class to represent a single item"""
 
     type_id: MatLibTypeID = field(init=False)
-    entity_id: uuid.UUID = field(default_factory=uuid.uuid4, init=False)
-    revision_id: uuid.UUID = field(default_factory=uuid.uuid4, init=False)
+    entity_id: UUID = field(default_factory=uuid4, init=False)
+    revision_id: UUID = field(default_factory=uuid4, init=False)
     revision_date: datetime = field(default_factory=datetime.utcnow, init=False)
+
+    def _load(self, x: ET.Element) -> None:
+        """Load in a XML Element to populate class data."""
+        self.entity_id = safe_uuid(x.attrib.get("Id"))
+        self.type_id = MatLibTypeID(safe_uuid(x.attrib.get("TypeId")))
+        self.revision_id = safe_uuid(x.attrib.get("RevisionId"))
+        self.revision_date = load_dt(x.attrib.get("RevisionDate"))
+        selfprops = self._get_properties()
+
+        for xmlprop in x.iter("Property"):
+            name = xmlprop.attrib.get("Name")
+            prop: MatProperty = next(filter(lambda p: p.name == name, selfprops))
+            if prop:
+                val = prop.setproc(xmlprop.text)
+                setattr(self, prop.atrset, val)
 
     def _get_properties(self) -> list[MatProperty]:
         """Return a list of properties in XML format.
@@ -82,7 +99,9 @@ class MatLibEntity:
         entity.set("Id", str(self.entity_id))
         entity.set("TypeId", str(self.type_id.value))
         entity.set("RevisionId", str(self.revision_id))
-        entity.set("RevisionDate", f"{self.revision_date.isoformat()}Z")
+
+        formatted_date = self.revision_date.isoformat().replace("+00:00", "Z")
+        entity.set("RevisionDate", f"{formatted_date}")
 
         [entity.append(p._get_xml()) for p in self._get_properties()]
         return entity
@@ -96,53 +115,68 @@ class DielectricBase(MatLibEntity):
     Resin: A percent, 0-100
     Glass temp: glass transistion temp in celsius"""
 
-    name: str
-    dielectric_constant: REALNUM
-    thickness: REALNUM
-    glass_trans_temp: REALNUM
-    manufacturer: str
-    construction: str
-    resin_pct: REALNUM
-    frequency: REALNUM
+    name: str = ""
+    dielectric_constant: REALNUM = 0
+    thickness: REALNUM = 0
+    glass_trans_temp: REALNUM = 0
+    manufacturer: str = ""
+    construction: str = ""
+    resin_pct: REALNUM = 0
+    frequency: REALNUM = 0
     loss_tangent: REALNUM = 0
 
     def _get_properties(self) -> list[MatProperty]:
         return [
-            MatProperty("Constructions", "String", self.construction),
             MatProperty(
-                "Resin", "DimValue", f"{self.resin_pct}%", {"Dimension": "Relative"}
+                "Constructions", "String", self.construction, atrset="construction"
+            ),
+            MatProperty(
+                "Resin",
+                "DimValue",
+                f"{self.resin_pct}%",
+                {"Dimension": "Relative"},
+                atrset="resin_pct",
+                setproc=lambda x: float(x.replace("%", "")),
             ),
             MatProperty(
                 "Frequency",
                 "DimValue",
                 humanize(self.frequency, "Hz", False),
                 {"Dimension": "Frequency"},
+                atrset="frequency",
+                setproc=lambda x: dehumanize(x, "Hz"),
             ),
             MatProperty(
                 "DielectricConstant",
                 "DimValue",
                 self.dielectric_constant,
                 {"Dimension": "Dimensionless"},
+                atrset="dielectric_constant",
             ),
             MatProperty(
                 "LossTangent",
                 "DimValue",
                 self.loss_tangent,
                 {"Dimension": "Dimensionless"},
+                atrset="loss_tangent",
             ),
             MatProperty(
                 "GlassTransTemp",
                 "DimValue",
                 f"{self.glass_trans_temp}C",
                 {"Dimension": "Temperature"},
+                atrset="glass_trans_temp",
             ),
-            MatProperty("Manufacturer", "String", self.manufacturer),
-            MatProperty("Name", "String", self.name),
+            MatProperty(
+                "Manufacturer", "String", self.manufacturer, atrset="manufacturer"
+            ),
+            MatProperty("Name", "String", self.name, atrset="name"),
             MatProperty(
                 "Thickness",
                 "DimValue",
                 f"{self.thickness}mm",
                 {"Dimension": "Length"},
+                atrset="thickness",
             ),
         ]
 
@@ -151,9 +185,9 @@ class DielectricBase(MatLibEntity):
 class FinishBase(MatLibEntity):
     """Base class used for all finishes, with common elements."""
 
-    process: str
-    material: str
-    thickness: REALNUM
+    process: str = ""
+    material: str = ""
+    thickness: REALNUM = 0
     color: str = "#ffffffff"
 
     def _get_properties(self) -> list[MatProperty]:
