@@ -1,10 +1,12 @@
 """helpers.py"""
 import re
-from typing import Any, AnyStr, Literal, Tuple
+from typing import Any, AnyStr, Literal, Tuple, Union
 
 import olefile
 
 from pyaltium.magic import MAX_READ_SIZE_BYTES
+
+REALNUM = Union[int, float]
 
 re_before_first_record = re.compile(r"^.*?(\|RECORD)")
 re_cleanstr = re.compile(r"[^\w_\.]")

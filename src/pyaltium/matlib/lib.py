@@ -7,7 +7,7 @@ from pyaltium.matlib.libitem import MatLibItem
 
 class MaterialsLibrary:
     xml: ET.Element
-    items: list[MatLibItem]
+    entities: list[MatLibItem]
 
     def __init__(self) -> None:
         # Set xml equal to headers by default

@@ -79,3 +79,17 @@ Returns:
     // ...
 ]
 ```
+
+## Contributing
+
+Have an idea? Open an issue! Have a change? submit a PR!
+
+Note that I have a long ways to go on this so don't expect too much as of now.
+Help is always welcome.
+
+## Licensing
+
+This project is licensed under GPLv3. Basically you can use this however you
+want but if you distribute (aka sell) something with it, you need to make
+the source available. Once this project gains some traction, I'll be open to
+moving to MIT if there's demand for it.
