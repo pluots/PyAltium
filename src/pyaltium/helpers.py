@@ -113,7 +113,7 @@ def normalize_dict(d: dict) -> dict:
 
 def byte_arr_str(
     s: bytes, len_length: int = 1, endianness: Literal["little", "big"] = "little"
-) -> Tuple[bytes, bytes]:
+) -> Tuple[str, bytes]:
     """Get a string encoded in a byte array.
 
     s is the string for data to be extracted from.
