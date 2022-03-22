@@ -1,9 +1,25 @@
 # PyAltium
 
-A tool to process Altium file types. Currently only supports reading of .SchLib and
-.PcbLib files.
+A tool to process Altium file types. Currently this tool is in alpha and does not have any parts fully functioning, except for the listing of PCBLib and SCHLib libraries.
 
-See full documentation here: [pyaltium.readthedocs.io](http://pyaltium.readthedocs.io)
+See full documentation here (WIP): [pyaltium.readthedocs.io](http://pyaltium.readthedocs.io)
+
+## Project Progress
+
+The goal of this project is to support most file types used by Altium. Reading is a priority, writing will be implemented for some types. The status of various file types is listed below:
+
+|                          | Extension   | List Items | Display | Write | Documentation |
+| ------------------------ | ----------- | ---------- | ------- | ----- | ------------- |
+| Binary Schematic Library | .SchLib     | ✓          | WIP     |       | WIP           |
+| Binary PCB Library       | .PcbLib     | ✓          | WIP     |       | WIP           |
+| Binary Schematic Doc     | .SchDoc     |            |         |       |               |
+| Binary PCB Doc           | .PcbDoc     |            |         |       |               |
+| Draftsman Doc            | .PcbDwf     |            |         |       |               |
+| PCB Project              | .PrjPcb     |            |         |       |               |
+| Material Library         | .xml        | WIP        | WIP     | WIP   | WIP           |
+| Any templates            | Not Planned |            |         |       |               |
+
+## Usage
 
 ### SchLib
 
@@ -17,11 +33,11 @@ from pyaltium import SchLib
 pp = pprint.PrettyPrinter(indent=4)
 
 sl = SchLib('myfile_name.SchLib')
-print(SchLib.list_items())
+pp.pprint(SchLib.list_items())
 
 ```
 
-Returns
+This returns something like the following with more elements:
 
 ```JSON
 [
@@ -29,8 +45,7 @@ Returns
         "libref": "ref1",
         "description": "My description",
         "sectionkey": "Section Key" // This is unneeded, just for internals
-    },
-    // ...
+    }
 ]
 ```
 
@@ -48,7 +63,7 @@ from pyaltium import SchLib
 pp = pprint.PrettyPrinter(indent=4)
 
 sl = SchLib('myfile_name.SchLib')
-print(SchLib.list_items())
+pp.pprint(SchLib.list_items())
 
 ```
 
