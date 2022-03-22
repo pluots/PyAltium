@@ -1,5 +1,6 @@
 """helpers.py"""
 import re
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, AnyStr, Literal, Tuple, Union
 
 import olefile
@@ -129,3 +130,28 @@ def byte_arr_str(
 
 def mil_to_um(n):
     pass
+
+
+def humanize(val: REALNUM, unit: str = "", space=True, trim=True, quantize=None) -> str:
+    def quant(x):
+        d = Decimal(x)
+        if trim:
+            d = d.quantize(Decimal(1)) if d == d.to_integral() else d.normalize()
+        if not quantize:
+            return str(d)
+        return d.quantize(Decimal(str(quantize)), rounding=ROUND_HALF_UP)
+
+    if space:
+        space = " "
+    else:
+        space = ""
+
+    if val < 1e3:
+        return f"{quant(val)}{space}{unit}"
+    if val < 1e6:
+        return f"{quant(val/1e3)}{space}k{unit}"
+    if val < 1e9:
+        return f"{quant(val/1e6)}{space}M{unit}"
+    if val < 1e12:
+        return f"{quant(val/1e9)}{space}G{unit}"
+    return f"{quant(val/1e12)}{space}T{unit}"

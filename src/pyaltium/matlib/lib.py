@@ -2,7 +2,7 @@ import uuid
 import xml.etree.ElementTree as ET
 from typing import TextIO
 
-from pyaltium.matlib.libitem import MatLibItem
+from pyaltium.matlib.base import MatLibItem
 
 
 class MaterialsLibrary:
