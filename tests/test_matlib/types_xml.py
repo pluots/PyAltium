@@ -29,3 +29,14 @@ class TypesXML:
       <Property Name="Material" Type="String">Nickel, gold</Property>
       <Property Name="Color" Type="System.Windows.Media.Color, PresentationCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">#FFFFFFFF</Property>
     </Entity>"""
+
+    SOLDERMASK = """<Entity Id="00000000-0000-0000-0000-000000000000" TypeId="968469a9-c799-46e2-bc61-c05b2553ab48" RevisionId="00000000-0000-0000-0000-000000000001" RevisionDate="2022-02-02T16:40:30.765432Z">
+      <Property Name="Solid" Type="DimValue" Dimension="Relative">4%</Property>
+      <Property Name="Color" Type="System.Windows.Media.Color, PresentationCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">#008800FF</Property>
+      <Property Name="Frequency" Type="DimValue" Dimension="Frequency">1GHz</Property>
+      <Property Name="DielectricConstant" Type="DimValue" Dimension="Dimensionless">3</Property>
+      <Property Name="LossTangent" Type="DimValue" Dimension="Dimensionless">0.1</Property>
+      <Property Name="Manufacturer" Type="String">Manufacturer</Property>
+      <Property Name="Name" Type="String">Test Soldermask</Property>
+      <Property Name="Thickness" Type="DimValue" Dimension="Length">0.05mm</Property>
+    </Entity>"""

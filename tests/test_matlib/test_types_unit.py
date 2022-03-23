@@ -12,6 +12,7 @@ from pyaltium.matlib.types import (
     FinishISn,
     FinishOSP,
     PrePreg,
+    SolderMask,
 )
 from tests.test_matlib.types_xml import TypesXML
 
@@ -109,6 +110,34 @@ class TestENIG(BaseTypeTest):
 
         self.validate_xml_match(e)
 
+    def test_load(self):
         e = FinishENIG()
         e._load(ET.fromstring(TypesXML.FINISH_ENIG))
+        self.validate_xml_match(e)
+
+
+class TestSolderMask(BaseTypeTest):
+    s_match = TypesXML.SOLDERMASK
+
+    def test_create(self):
+        e = SolderMask(
+            name="Test Soldermask",
+            dielectric_constant=3,
+            thickness=0.05,
+            manufacturer="Manufacturer",
+            frequency=1e9,
+            loss_tangent=0.1,
+            solid=4,
+            color="#008800FF",
+        )
+
+        e.entity_id = UUID(int=0)
+        e.revision_id = UUID(int=1)
+        e.revision_date = datetime(2022, 2, 2, 16, 40, 30, 765432)
+
+        self.validate_xml_match(e)
+
+    def test_load(self):
+        e = SolderMask()
+        e._load(ET.fromstring(TypesXML.SOLDERMASK))
         self.validate_xml_match(e)

@@ -62,6 +62,7 @@ class ColorProperty(MatProperty):
     validator_message: str = field(
         default="Color needs to be in the format #abababab (hex plus alpha)", init=False
     )
+    atrset: str = "color"
 
 
 @dataclass
@@ -213,9 +214,10 @@ class FinishBase(MatLibEntity):
                 "DimValue",
                 humanize(self.thickness, "mm", quantize="0.000001", prefix=False),
                 {"Dimension": "Length"},
+                atrset="thickness",
                 setproc=to_mm,
             ),
-            MatProperty("Process", "String", self.process),
-            MatProperty("Material", "String", self.material),
+            MatProperty("Process", "String", self.process, atrset="process"),
+            MatProperty("Material", "String", self.material, atrset="material"),
             ColorProperty(self.color),
         ]
