@@ -128,4 +128,4 @@ def get_type_cls_by_id(type_id):
         type_id = MatLibTypeID(type_id)
     except ValueError:
         return None
-    return next(filter(lambda t: t.type_id == type_id, _types))
+    return next(filter(lambda t: t.type_id == type_id, _types),None)

@@ -1,12 +1,11 @@
+import json
 import re
 import xml.etree.ElementTree as ET
-from typing import Iterable, TextIO, Union
+from typing import Iterable, TextIO, TypeVar, Union
 from uuid import UUID, uuid4
 
 from pyaltium.matlib.base import MatLibEntity
 from pyaltium.matlib.types import get_type_cls_by_id
-
-_ns = {"extlib": "http://altium.com/ns/Data/ExtensibleLibraries"}
 
 
 class MaterialsLibrary:
@@ -41,21 +40,26 @@ class MaterialsLibrary:
         self.ns = ns  # XML namespaces for maximum annoyance
         self.entities = []
 
-    def _load(self, root: ET.Element):
+    @classmethod
+    def from_et(cls: "MaterialsLibrary", x: ET.Element) -> "MaterialsLibrary":
         """Load in a XML document root as parameters and entities."""
-        self.serializer_version = root.attrib.get(
-            "SerializerVersion", self.serializer_version
+        m = re.match(r"\{(.*)\}", x.tag)
+        instance = cls(
+            x.attrib.get("SerializerVersion"),
+            x.attrib.get("LibraryID"),
+            x.attrib.get("Version"),
+            m.group(1) if m else "",
         )
-        self.library_id = root.attrib.get("LibraryID", self.library_id)
-        self.version = root.attrib.get("Version", self.version)
 
-        m = re.match(r"\{(.*)\}", root.tag)
-        self.ns = m.group(1) if m else ""
-
-        for element in root.findall(f"./{{{self.ns}}}Entities/{{{self.ns}}}Entity"):
+        for element in x.findall(
+            f"./{{{instance.ns}}}Entities/{{{instance.ns}}}Entity"
+        ):
             type_id = element.attrib.get("TypeId")
             type_cls = get_type_cls_by_id(type_id)
-            self.entities.append(type_cls()._load(element))
+            if type_cls:
+                instance.entities.append(type_cls.from_et(element))
+
+        return instance
 
     def _get_xml(self) -> ET.ElementTree:
         pass
@@ -66,7 +70,7 @@ class MaterialsLibrary:
         return filter(lambda x: isinstance(x, obj_type), self.entities)
 
     def loads(self, s):
-        self._load(ET.fromstring(s))
+        self.from_et(ET.fromstring(s))
 
     def load(self, file: Union[TextIO, str]):
         """Read this library from an XML file.
@@ -75,7 +79,7 @@ class MaterialsLibrary:
         xml.etree.ElementTree.ElementTree.parse().
         :type file: Union[TextIO, str]
         """
-        self._load(ET.parse(file).getroot())
+        self.from_et(ET.parse(file).getroot())
 
     def dumps(self) -> str:
         return ET.tostring(self._get_xml(), encoding="UTF-8", xml_declaration=True)

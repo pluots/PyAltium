@@ -61,8 +61,7 @@ class TestCore(BaseTypeTest):
         self.validate_xml_match(e)
 
     def test_load(self):
-        e = Core()
-        e._load(ET.fromstring(TypesXML.CORE))
+        e = Core.from_et(ET.fromstring(TypesXML.CORE))
         self.validate_xml_match(e)
 
 
@@ -88,8 +87,7 @@ class TestPrePreg(BaseTypeTest):
         self.validate_xml_match(e)
 
     def test_load(self):
-        e = PrePreg()
-        e._load(ET.fromstring(TypesXML.PREPREG))
+        e = PrePreg.from_et(ET.fromstring(TypesXML.PREPREG))
         self.validate_xml_match(e)
 
 
@@ -111,8 +109,7 @@ class TestENIG(BaseTypeTest):
         self.validate_xml_match(e)
 
     def test_load(self):
-        e = FinishENIG()
-        e._load(ET.fromstring(TypesXML.FINISH_ENIG))
+        e = FinishENIG.from_et(ET.fromstring(TypesXML.FINISH_ENIG))
         self.validate_xml_match(e)
 
 
@@ -138,6 +135,5 @@ class TestSolderMask(BaseTypeTest):
         self.validate_xml_match(e)
 
     def test_load(self):
-        e = SolderMask()
-        e._load(ET.fromstring(TypesXML.SOLDERMASK))
+        e = SolderMask.from_et(ET.fromstring(TypesXML.SOLDERMASK))
         self.validate_xml_match(e)

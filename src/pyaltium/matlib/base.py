@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import KW_ONLY, dataclass, field
 from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Callable
+from typing import Callable, Type, TypeVar
 from uuid import UUID, uuid4
 
 from dateutil.parser import isoparse
@@ -65,6 +65,9 @@ class ColorProperty(MatProperty):
     atrset: str = "color"
 
 
+T = TypeVar("T", bound="MatLibEntity")
+
+
 @dataclass
 class MatLibEntity:
     """Base class to represent a single item. This Entity will contain multiple properties."""
@@ -75,22 +78,26 @@ class MatLibEntity:
     revision_date: datetime = field(default_factory=datetime.utcnow, init=False)
     ns: str = ""
 
-    def _load(self, x: ET.Element) -> None:
+    @classmethod
+    def from_et(cls: Type[T], x: ET.Element, ns: str = "") -> T:
         """Load in a XML Element to populate class data."""
-        self.entity_id = safe_uuid(x.attrib.get("Id"))
-        self.type_id = MatLibTypeID(x.attrib.get("TypeId"))
-        self.revision_id = safe_uuid(x.attrib.get("RevisionId"))
-        self.revision_date = isoparse(x.attrib.get("RevisionDate"))
-        selfprops = self._get_properties()
+        instance = cls()
+        instance.entity_id = safe_uuid(x.attrib.get("Id"))
+        instance.type_id = MatLibTypeID(x.attrib.get("TypeId"))
+        instance.revision_id = safe_uuid(x.attrib.get("RevisionId"))
+        instance.revision_date = isoparse(x.attrib.get("RevisionDate"))
+        instanceprops = instance._get_properties()
 
-        ns = f"{{{self.ns}:}}" if self.ns else ""
+        ns = f"{{{instance.ns}:}}" if ns else ""
 
         for xmlprop in x.iter(f"{ns}Property"):
             name = xmlprop.attrib.get("Name")
-            prop: MatProperty = next(filter(lambda p: p.name == name, selfprops))
+            prop: MatProperty = next(filter(lambda p: p.name == name, instanceprops))
             if prop:
                 val = prop.setproc(xmlprop.text)
-                setattr(self, prop.atrset, val)
+                setattr(instance, prop.atrset, val)
+
+        return instance
 
     def _get_properties(self) -> list[MatProperty]:
         """Return a list of properties in XML format.
