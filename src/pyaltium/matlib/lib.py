@@ -64,7 +64,7 @@ class MaterialsLibrary:
 
     def _get_xml(self) -> ET.ElementTree:
         ns = f"{{{self.ns}:}}" if self.ns else ""
-        root = ET.Element(f"{ns}Entity")
+        root = ET.Element(f"{ns}ExtensibleLibrary")
         root.set("SerializerVersion", self.serializer_version)
         root.set("LibraryID", str(self.library_id))
         root.set("Version", self.version)
@@ -73,6 +73,9 @@ class MaterialsLibrary:
         entities = ET.SubElement(root, "Entities")
         ET.SubElement(root, "EntityExtensions")
         [entities.append(e._get_xml()) for e in self.entities]
+
+        ET.indent(root)
+        return root
 
     def getall(
         self, obj_type: Union[MatLibEntity, tuple[MatLibEntity]]
@@ -103,4 +106,5 @@ class MaterialsLibrary:
         xml.etree.ElementTree.ElementTree.write().
         :type file: Union[TextIO, str]
         """
-        self._get_xml().write(file, encoding="UTF-8", xml_declaration=True)
+        tree = ET.ElementTree(self._get_xml())
+        tree.write(file, encoding="UTF-8", xml_declaration=True)
