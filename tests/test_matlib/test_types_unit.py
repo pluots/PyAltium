@@ -3,6 +3,7 @@ from datetime import datetime
 from uuid import UUID
 from xml.etree.ElementTree import dump
 
+from pyaltium.matlib.base import MatLibEntity
 from pyaltium.matlib.types import (
     Core,
     FinishENIG,
@@ -12,18 +13,7 @@ from pyaltium.matlib.types import (
     FinishOSP,
     PrePreg,
 )
-
-CORE_XML = """<Entity Id="00000000-0000-0000-0000-000000000000" TypeId="27d70fdc-4c4e-4774-bfac-7efbb48cde47" RevisionId="00000000-0000-0000-0000-000000000001" RevisionDate="2022-02-02T16:40:30.765432Z">
-      <Property Name="Constructions" Type="String">1080</Property>
-      <Property Name="Resin" Type="DimValue" Dimension="Relative">40%</Property>
-      <Property Name="Frequency" Type="DimValue" Dimension="Frequency">1GHz</Property>
-      <Property Name="DielectricConstant" Type="DimValue" Dimension="Dimensionless">4.0</Property>
-      <Property Name="LossTangent" Type="DimValue" Dimension="Dimensionless">0.01</Property>
-      <Property Name="GlassTransTemp" Type="DimValue" Dimension="Temperature">180C</Property>
-      <Property Name="Manufacturer" Type="String">Manufacturer Name</Property>
-      <Property Name="Name" Type="String">Core Name</Property>
-      <Property Name="Thickness" Type="DimValue" Dimension="Length">0.1mm</Property>
-    </Entity>"""
+from tests.test_matlib.types_xml import TypesXML
 
 
 def canonicalize_XML(x=None, s: str = None):
@@ -39,17 +29,64 @@ def canonicalize_XML(x=None, s: str = None):
     return ET.canonicalize(xstr, strip_text=True)
 
 
-def test_core_create():
-    e = Core("Core Name", 4.0, 0.1, 180, "Manufacturer Name", "1080", 40, 1e9, 0.01)
-    e.entity_id = UUID(int=0)
-    e.revision_id = UUID(int=1)
-    e.revision_date = datetime(2022, 2, 2, 16, 40, 30, 765432)
+class BaseTypeTest:
+    s_match: str
 
-    assert canonicalize_XML(e._get_xml()) == canonicalize_XML(s=CORE_XML)
+    def validate_xml_match(self, e: MatLibEntity, s: str = None):
+        if s is None:
+            s = self.s_match
+        assert canonicalize_XML(e._get_xml()) == canonicalize_XML(s=s)
 
 
-def test_core_load():
-    e = Core()
-    e._load(ET.fromstring(CORE_XML))
+class TestCore(BaseTypeTest):
+    s_match = TypesXML.CORE
 
-    assert canonicalize_XML(e._get_xml()) == canonicalize_XML(s=CORE_XML)
+    def test_create(self):
+        e = Core(
+            name="Core Name",
+            dielectric_constant=4.0,
+            thickness=0.1,
+            glass_trans_temp=180,
+            manufacturer="Manufacturer Name",
+            construction="1080",
+            resin_pct=40,
+            frequency=1e9,
+            loss_tangent=0.01,
+        )
+        e.entity_id = UUID(int=0)
+        e.revision_id = UUID(int=1)
+        e.revision_date = datetime(2022, 2, 2, 16, 40, 30, 765432)
+
+        self.validate_xml_match(e)
+
+    def test_load(self):
+        e = Core()
+        e._load(ET.fromstring(TypesXML.CORE))
+        self.validate_xml_match(e)
+
+
+class TestPrePreg(BaseTypeTest):
+    s_match = TypesXML.PREPREG
+
+    def test_create(self):
+        e = PrePreg(
+            name="Prepreg Name",
+            dielectric_constant=4.0,
+            thickness=0.1,
+            glass_trans_temp=180,
+            manufacturer="Manufacturer Name",
+            construction="1x1080",
+            resin_pct=40,
+            frequency=1e9,
+            loss_tangent=0.01,
+        )
+        e.entity_id = UUID(int=0)
+        e.revision_id = UUID(int=1)
+        e.revision_date = datetime(2022, 2, 2, 16, 40, 30, 765432)
+
+        self.validate_xml_match(e)
+
+    def test_load(self):
+        e = PrePreg()
+        e._load(ET.fromstring(TypesXML.PREPREG))
+        self.validate_xml_match(e)
