@@ -33,7 +33,7 @@ class MatProperty:
     atrset: str = ""
     setproc: Callable = field(default=lambda x: x)
 
-    def _get_xml(self):
+    def _get_xml(self, ns: str = None):
         """Validate value then return an XML element."""
         if self.validator:
             if not self.__class__.validator(self.value):
@@ -73,6 +73,7 @@ class MatLibEntity:
     entity_id: UUID = field(default_factory=uuid4, init=False)
     revision_id: UUID = field(default_factory=uuid4, init=False)
     revision_date: datetime = field(default_factory=datetime.utcnow, init=False)
+    ns: str = ""
 
     def _load(self, x: ET.Element) -> None:
         """Load in a XML Element to populate class data."""
@@ -82,7 +83,9 @@ class MatLibEntity:
         self.revision_date = isoparse(x.attrib.get("RevisionDate"))
         selfprops = self._get_properties()
 
-        for xmlprop in x.iter("Property"):
+        ns = f"{{{self.ns}:}}" if self.ns else ""
+
+        for xmlprop in x.iter(f"{ns}Property"):
             name = xmlprop.attrib.get("Name")
             prop: MatProperty = next(filter(lambda p: p.name == name, selfprops))
             if prop:
@@ -104,7 +107,8 @@ class MatLibEntity:
         raise NotImplementedError
 
     def _get_xml(self) -> ET.Element:
-        entity = ET.Element("Entity")
+        ns = f"{{{self.ns}:}}" if self.ns else ""
+        entity = ET.Element(f"{ns}Entity")
         entity.set("Id", str(self.entity_id))
         entity.set("TypeId", str(self.type_id.value))
         entity.set("RevisionId", str(self.revision_id))

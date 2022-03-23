@@ -105,3 +105,27 @@ class SolderMask(MatLibEntity):
                 setproc=to_mm,
             ),
         ]
+
+
+_types = (
+    Core,
+    PrePreg,
+    FinishENIG,
+    FinishHASL,
+    FinishIAu,
+    FinishISn,
+    FinishOSP,
+    SolderMask,
+)
+
+
+def get_type_cls_by_id(type_id):
+    """Return the apropriate type class from a type UUID
+
+    :param type_id: Type UUID
+    """
+    try:
+        type_id = MatLibTypeID(type_id)
+    except ValueError:
+        return None
+    return next(filter(lambda t: t.type_id == type_id, _types))
