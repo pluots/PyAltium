@@ -82,15 +82,14 @@ class MatLibEntity:
     def from_et(cls: Type[T], x: ET.Element, ns: str = "") -> T:
         """Load in a XML Element to populate class data."""
         instance = cls()
+        instance.ns = ns
         instance.entity_id = safe_uuid(x.attrib.get("Id"))
         instance.type_id = MatLibTypeID(x.attrib.get("TypeId"))
         instance.revision_id = safe_uuid(x.attrib.get("RevisionId"))
         instance.revision_date = isoparse(x.attrib.get("RevisionDate"))
         instanceprops = instance._get_properties()
 
-        ns = f"{{{instance.ns}:}}" if ns else ""
-
-        for xmlprop in x.iter(f"{ns}Property"):
+        for xmlprop in x.findall("{*}Property"):
             name = xmlprop.attrib.get("Name")
             prop: MatProperty = next(filter(lambda p: p.name == name, instanceprops))
             if prop:

@@ -44,11 +44,12 @@ class MaterialsLibrary:
     def from_et(cls: "MaterialsLibrary", x: ET.Element) -> "MaterialsLibrary":
         """Load in a XML document root as parameters and entities."""
         m = re.match(r"\{(.*)\}", x.tag)
+        ns = m.group(1) if m else ""
         instance = cls(
             x.attrib.get("SerializerVersion"),
-            x.attrib.get("LibraryID"),
+            x.attrib.get("LibraryId"),
             x.attrib.get("Version"),
-            m.group(1) if m else "",
+            ns,
         )
 
         for element in x.findall(
@@ -57,29 +58,40 @@ class MaterialsLibrary:
             type_id = element.attrib.get("TypeId")
             type_cls = get_type_cls_by_id(type_id)
             if type_cls:
-                instance.entities.append(type_cls.from_et(element))
+                instance.entities.append(type_cls.from_et(element, ns))
 
         return instance
 
     def _get_xml(self) -> ET.ElementTree:
-        pass
+        ns = f"{{{self.ns}:}}" if self.ns else ""
+        root = ET.Element(f"{ns}Entity")
+        root.set("SerializerVersion", self.serializer_version)
+        root.set("LibraryID", str(self.library_id))
+        root.set("Version", self.version)
+        ET.SubElement(root, "Types")
+        ET.SubElement(root, "TypeExtensions")
+        entities = ET.SubElement(root, "Entities")
+        ET.SubElement(root, "EntityExtensions")
+        [entities.append(e._get_xml()) for e in self.entities]
 
     def getall(
         self, obj_type: Union[MatLibEntity, tuple[MatLibEntity]]
     ) -> Iterable[MatLibEntity]:
         return filter(lambda x: isinstance(x, obj_type), self.entities)
 
-    def loads(self, s):
-        self.from_et(ET.fromstring(s))
+    @classmethod
+    def loads(cls, s):
+        return cls.from_et(ET.fromstring(s))
 
-    def load(self, file: Union[TextIO, str]):
+    @classmethod
+    def load(cls, file: Union[TextIO, str]):
         """Read this library from an XML file.
 
         :param file: File name as string or pointer as an IO type. Passed directly to
         xml.etree.ElementTree.ElementTree.parse().
         :type file: Union[TextIO, str]
         """
-        self.from_et(ET.parse(file).getroot())
+        return cls.from_et(ET.parse(file).getroot())
 
     def dumps(self) -> str:
         return ET.tostring(self._get_xml(), encoding="UTF-8", xml_declaration=True)
