@@ -3,11 +3,14 @@
 Base matlib types not really meant for direct use outside of source."""
 import xml.etree.ElementTree as ET
 from dataclasses import KW_ONLY, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Callable
 from uuid import UUID, uuid4
 
-from pyaltium.helpers import REALNUM, dehumanize, humanize, load_dt, safe_uuid
+from dateutil.parser import isoparse
+
+from pyaltium.helpers import REALNUM, dehumanize, humanize, safe_uuid, to_celsius, to_mm
 from pyaltium.matlib.helpers import HEX_ALPHA_REGEX, MatLibTypeID
 
 
@@ -63,7 +66,7 @@ class ColorProperty(MatProperty):
 
 @dataclass
 class MatLibEntity:
-    """Base class to represent a single item"""
+    """Base class to represent a single item. This Entity will contain multiple properties."""
 
     type_id: MatLibTypeID = field(init=False)
     entity_id: UUID = field(default_factory=uuid4, init=False)
@@ -73,9 +76,9 @@ class MatLibEntity:
     def _load(self, x: ET.Element) -> None:
         """Load in a XML Element to populate class data."""
         self.entity_id = safe_uuid(x.attrib.get("Id"))
-        self.type_id = MatLibTypeID(safe_uuid(x.attrib.get("TypeId")))
+        self.type_id = MatLibTypeID(x.attrib.get("TypeId"))
         self.revision_id = safe_uuid(x.attrib.get("RevisionId"))
-        self.revision_date = load_dt(x.attrib.get("RevisionDate"))
+        self.revision_date = isoparse(x.attrib.get("RevisionDate"))
         selfprops = self._get_properties()
 
         for xmlprop in x.iter("Property"):
@@ -88,6 +91,11 @@ class MatLibEntity:
     def _get_properties(self) -> list[MatProperty]:
         """Return a list of properties in XML format.
 
+
+        Note for implementation: make sure to reasonably quantize any numbers you perform
+        math on, otherwise the XML won't be clean and Altium may have trouble
+        importing.
+
         :raises NotImplementedError: Method not properly overridden
         :return: List of properties
         :rtype: list[MatProperty]
@@ -99,7 +107,8 @@ class MatLibEntity:
         entity.set("Id", str(self.entity_id))
         entity.set("TypeId", str(self.type_id.value))
         entity.set("RevisionId", str(self.revision_id))
-
+        if self.revision_date.tzinfo is None:
+            self.revision_date = self.revision_date.replace(tzinfo=timezone.utc)
         formatted_date = self.revision_date.isoformat().replace("+00:00", "Z")
         entity.set("RevisionDate", f"{formatted_date}")
 
@@ -133,7 +142,7 @@ class DielectricBase(MatLibEntity):
             MatProperty(
                 "Resin",
                 "DimValue",
-                f"{self.resin_pct}%",
+                humanize(self.resin_pct, "%", quantize="0.01", prefix=False),
                 {"Dimension": "Relative"},
                 atrset="resin_pct",
                 setproc=lambda x: float(x.replace("%", "")),
@@ -141,7 +150,7 @@ class DielectricBase(MatLibEntity):
             MatProperty(
                 "Frequency",
                 "DimValue",
-                humanize(self.frequency, "Hz", False),
+                humanize(self.frequency, "Hz", quantize="0.01"),
                 {"Dimension": "Frequency"},
                 atrset="frequency",
                 setproc=lambda x: dehumanize(x, "Hz"),
@@ -163,9 +172,15 @@ class DielectricBase(MatLibEntity):
             MatProperty(
                 "GlassTransTemp",
                 "DimValue",
-                f"{self.glass_trans_temp}C",
+                humanize(
+                    self.glass_trans_temp,
+                    "C",
+                    quantize="0.01",
+                    prefix=False,
+                ),
                 {"Dimension": "Temperature"},
                 atrset="glass_trans_temp",
+                setproc=to_celsius,
             ),
             MatProperty(
                 "Manufacturer", "String", self.manufacturer, atrset="manufacturer"
@@ -174,9 +189,10 @@ class DielectricBase(MatLibEntity):
             MatProperty(
                 "Thickness",
                 "DimValue",
-                f"{self.thickness}mm",
+                humanize(self.thickness, "mm", quantize="0.0001", prefix=False),
                 {"Dimension": "Length"},
                 atrset="thickness",
+                setproc=to_mm,
             ),
         ]
 
@@ -195,8 +211,9 @@ class FinishBase(MatLibEntity):
             MatProperty(
                 "Thickness",
                 "DimValue",
-                f"{self.thickness}mm",
+                humanize(self.thickness, "mm", quantize="0.0001", prefix=False),
                 {"Dimension": "Length"},
+                setproc=to_mm,
             ),
             MatProperty("Process", "String", self.process),
             MatProperty("Material", "String", self.material),

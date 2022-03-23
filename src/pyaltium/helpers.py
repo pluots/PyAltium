@@ -130,17 +130,94 @@ def byte_arr_str(
     return text.decode("utf8"), s[text_end:]
 
 
-def mil_to_um(n):
-    pass
+def to_um(n) -> Decimal:
+    """Coerce a string with units to mm
+
+    :param s: String to format
+    :type s: str
+    :return: Decimal version of the given string
+    :rtype: Decimal
+    """
 
 
-def humanize(val: REALNUM, unit: str = "", space=True, trim=True, quantize=None) -> str:
+def to_mm(s: str) -> Decimal:
+    """Coerce a string with units to mm
+
+    :param s: String to format
+    :type s: str
+    :return: Decimal version of the given string in mm
+    :rtype: Decimal
+    """
+    if "mil" in s:
+        return Decimal(s.replace("mm", "")) * Decimal(0.0254)
+    if "in" in s or "inch" in s or '"' in s:
+        return Decimal(
+            s.replace("inch", "").replace("in", "").replace('"', "")
+        ) * Decimal(25.4)
+
+    # Assume mm by default
+    return Decimal(s.replace("mm", ""))
+
+
+def to_celsius(s: str) -> Decimal:
+    """Coerce a string with units to Celsius
+
+    :param s: String to format
+    :type s: str
+    :return: Decimal version of the given string in °C
+    :rtype: Decimal
+    """
+
+    s = s.replace("°", "")
+
+    if "F" in s:
+        return (Decimal(s.replace("F", "")) - Decimal(32)) * Decimal(5 / 9)
+    if "K" in s:
+        return Decimal(s.replace("K", "")) - Decimal(273.15)
+    # Assume C by default
+    return Decimal(s.replace("C", ""))
+
+
+def humanize(
+    val: REALNUM,
+    unit: str = "",
+    space=False,
+    trim=True,
+    quantize=None,
+    prefix=True,
+    baseunit: str = None,
+    rounding=ROUND_HALF_UP,
+) -> str:
+    """Humanize a value to SI units.
+
+    :param val: Value to humanize
+    :type val: REALNUM
+    :param unit: Unit to append at the end ('Hz', 'm', etc), defaults to ""
+    :type unit: str, optional
+    :param space: Whether to include a space between the number and the unit, defaults to True
+    :type space: bool, optional
+    :param trim: Whether to remove trailing zeroes within given quantization, defaults to True
+    :type trim: bool, optional
+    :param quantize: Quantize specification for rounding if desired, e.g. '0.01', defaults to None
+    :type quantize: _type_, optional
+    :return: Formatted string
+    :rtype: str
+    """
+
     def quant(d):
+        # If we quantize,
+        if quantize:
+            d = d.quantize(Decimal(str(quantize)), rounding=rounding)
+
         if trim:
-            d = d.quantize(Decimal(1)) if d == d.to_integral() else d.normalize()
-        if not quantize:
-            return str(d)
-        return d.quantize(Decimal(str(quantize)), rounding=ROUND_HALF_UP)
+            # Check if decimal is an int; if so, use quantize
+            # Normalize will set e.g. 100 to '1E+2'
+            if d == d.to_integral():
+                d = d.quantize(Decimal(1))
+            # Otherwise use normalize to remove trailing zeroes
+            else:
+                d = d.normalize()
+        return str(d)
 
     if space:
         space = " "
@@ -149,7 +226,10 @@ def humanize(val: REALNUM, unit: str = "", space=True, trim=True, quantize=None)
 
     val = Decimal(val)
 
-    if val < 1000:
+    if baseunit:
+        raise NotImplementedError
+
+    if not prefix or val < 1000:
         return f"{quant(val)}{space}{unit}"
     if val < 1000 ** 2:
         return f"{quant(val/1000)}{space}k{unit}"
@@ -161,6 +241,16 @@ def humanize(val: REALNUM, unit: str = "", space=True, trim=True, quantize=None)
 
 
 def dehumanize(s: str, unit: str = "") -> Decimal:
+    """Remove SI units and return the equivilent decimal.
+
+    :param s: String to format
+    :type s: str
+    :param unit: Base unit to work with (e.g. "Hz", "m"), defaults to ""
+    :type unit: str, optional
+    :return: Decimal format of the returned value
+    :rtype: Decimal
+    """
+    # Get units
     res = re.search(r"(\d+\.?\d*)(\w*)", s)
     num = res.group(1)
     sfx = res.group(2)
@@ -193,8 +283,3 @@ def safe_uuid(*args, ret="input", **kwargs):
                 return args[0]
             return kwargs.get("int", kwargs.get("hex"))
         return UUID(int=0)
-
-
-def load_dt(s: str):
-    s = s.replace("Z", "+00:00")
-    return datetime.fromisoformat(s.replace("Z", "+00:00"))

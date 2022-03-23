@@ -13,7 +13,7 @@ from pyaltium.matlib.types import (
     PrePreg,
 )
 
-CORE_XML = """<Entity Id="00000000-0000-0000-0000-000000000000" TypeId="27d70fdc-4c4e-4774-bfac-7efbb48cde47" RevisionId="00000000-0000-0000-0000-000000000001" RevisionDate="2022-02-02T16:40:30.7654321Z">
+CORE_XML = """<Entity Id="00000000-0000-0000-0000-000000000000" TypeId="27d70fdc-4c4e-4774-bfac-7efbb48cde47" RevisionId="00000000-0000-0000-0000-000000000001" RevisionDate="2022-02-02T16:40:30.765432Z">
       <Property Name="Constructions" Type="String">1080</Property>
       <Property Name="Resin" Type="DimValue" Dimension="Relative">40%</Property>
       <Property Name="Frequency" Type="DimValue" Dimension="Frequency">1GHz</Property>
@@ -43,7 +43,7 @@ def test_core_create():
     e = Core("Core Name", 4.0, 0.1, 180, "Manufacturer Name", "1080", 40, 1e9, 0.01)
     e.entity_id = UUID(int=0)
     e.revision_id = UUID(int=1)
-    e.revision_date = datetime(2000, 1, 1)
+    e.revision_date = datetime(2022, 2, 2, 16, 40, 30, 765432)
 
     assert canonicalize_XML(e._get_xml()) == canonicalize_XML(s=CORE_XML)
 

@@ -8,6 +8,7 @@ olefile = "*"
 matplotlib = "*"
 pyaltium = {editable = true, path = "."}
 configparser = "*"
+python-dateutil = "*"
 
 [dev-packages]
 black = "*"
