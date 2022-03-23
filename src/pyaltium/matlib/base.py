@@ -189,7 +189,7 @@ class DielectricBase(MatLibEntity):
             MatProperty(
                 "Thickness",
                 "DimValue",
-                humanize(self.thickness, "mm", quantize="0.0001", prefix=False),
+                humanize(self.thickness, "mm", quantize="0.000001", prefix=False),
                 {"Dimension": "Length"},
                 atrset="thickness",
                 setproc=to_mm,
@@ -211,7 +211,7 @@ class FinishBase(MatLibEntity):
             MatProperty(
                 "Thickness",
                 "DimValue",
-                humanize(self.thickness, "mm", quantize="0.0001", prefix=False),
+                humanize(self.thickness, "mm", quantize="0.000001", prefix=False),
                 {"Dimension": "Length"},
                 setproc=to_mm,
             ),

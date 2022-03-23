@@ -22,3 +22,10 @@ class TypesXML:
       <Property Name="Name" Type="String">Prepreg Name</Property>
       <Property Name="Thickness" Type="DimValue" Dimension="Length">0.1mm</Property>
     </Entity>"""
+
+    FINISH_ENIG = """<Entity Id="00000000-0000-0000-0000-000000000000" TypeId="b6b5d288-d4b3-4b60-857f-b949da02a37a" RevisionId="00000000-0000-0000-0000-000000000001" RevisionDate="2022-02-02T16:40:30.765432Z">
+      <Property Name="Thickness" Type="DimValue" Dimension="Length">0.004mm</Property>
+      <Property Name="Process" Type="String">Electroless nickle immersion gold</Property>
+      <Property Name="Material" Type="String">Nickel, gold</Property>
+      <Property Name="Color" Type="System.Windows.Media.Color, PresentationCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">#FFFFFFFF</Property>
+    </Entity>"""

@@ -90,3 +90,25 @@ class TestPrePreg(BaseTypeTest):
         e = PrePreg()
         e._load(ET.fromstring(TypesXML.PREPREG))
         self.validate_xml_match(e)
+
+
+class TestENIG(BaseTypeTest):
+    s_match = TypesXML.FINISH_ENIG
+
+    def test_create(self):
+        e = FinishENIG(
+            process="Electroless nickle immersion gold",
+            material="Nickel, gold",
+            thickness=0.004,
+            color="#FFFFFFFF",
+        )
+
+        e.entity_id = UUID(int=0)
+        e.revision_id = UUID(int=1)
+        e.revision_date = datetime(2022, 2, 2, 16, 40, 30, 765432)
+
+        self.validate_xml_match(e)
+
+        e = FinishENIG()
+        e._load(ET.fromstring(TypesXML.FINISH_ENIG))
+        self.validate_xml_match(e)
