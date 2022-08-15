@@ -1,9 +1,5 @@
 import re
-from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
-from uuid import UUID
-
-from pyaltium.helpers import REALNUM
 
 HEX_ALPHA_REGEX = re.compile(r"#[0-9A-Fa-f]{8}")
 

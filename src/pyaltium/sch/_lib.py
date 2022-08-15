@@ -1,11 +1,10 @@
-from pyaltium.base import AltiumLibMixin
-from pyaltium.helpers import (
+from pyaltium._helpers import (
     altium_string_split,
     altium_value_from_key,
     sch_sectionkeys_to_dict,
 )
-from pyaltium.magic import SCHLIB_HEADER
-from pyaltium.sch.libitem import SchLibItem
+from pyaltium.base import AltiumLibMixin, Magic
+from pyaltium.sch._item import SchLibItem
 
 
 class SchLib(AltiumLibMixin[SchLibItem]):
@@ -24,7 +23,7 @@ class SchLib(AltiumLibMixin[SchLibItem]):
     def _verify_file_type(self, fname: str) -> bool:
         """Check if our magic string is in the header."""
         fh_str = self._read_decode_stream("FileHeader", 128)
-        return SCHLIB_HEADER in fh_str
+        return Magic.SCHLIB_HEADER in fh_str
 
     def _update_header_and_section_keys(self) -> None:
         """Just update class's _header_keys_list object."""

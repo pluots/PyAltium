@@ -32,9 +32,8 @@ from pyaltium import SchLib
 # Set up our pretty printer so our output is understandable
 pp = pprint.PrettyPrinter(indent=4)
 
-sl = SchLib('myfile_name.SchLib')
+sl = SchLib("myfile_name.SchLib")
 pp.pprint(SchLib.list_items())
-
 ```
 
 This returns something like the following with more elements:
@@ -62,9 +61,8 @@ from pyaltium import SchLib
 # Set up our pretty printer so our output is understandable
 pp = pprint.PrettyPrinter(indent=4)
 
-sl = SchLib('myfile_name.SchLib')
+sl = SchLib("myfile_name.SchLib")
 pp.pprint(SchLib.list_items())
-
 ```
 
 Returns:

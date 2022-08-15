@@ -1,4 +1,4 @@
-from pyaltium.helpers import byte_arr_str
+from pyaltium._helpers import byte_arr_str
 
 
 def test_byte_arr_str():

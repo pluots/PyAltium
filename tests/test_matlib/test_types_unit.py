@@ -1,19 +1,9 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from uuid import UUID
-from xml.etree.ElementTree import dump
 
 from pyaltium.matlib.base import MatLibEntity
-from pyaltium.matlib.types import (
-    Core,
-    FinishENIG,
-    FinishHASL,
-    FinishIAu,
-    FinishISn,
-    FinishOSP,
-    PrePreg,
-    SolderMask,
-)
+from pyaltium.matlib.types import Core, FinishENIG, PrePreg, SolderMask
 from tests.test_matlib.types_xml import TypesXML
 
 

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from pyaltium.base import AltiumLibItemMixin
-from pyaltium.sch.libitemrecord import (
+from pyaltium.sch._record import (
     SchLibItemRecord,
     get_sch_lib_item_record,
     handle_pin_records,

@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import math
 from typing import Dict, Iterable, List, TypeVar
 
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-from pyaltium.helpers import eval_bool, eval_color, normalize_dict
-from pyaltium.sch.helpers import SchLibItemRecordType, pinstr_to_records
+from pyaltium._helpers import eval_bool, eval_color, normalize_dict
+from pyaltium.sch._helpers import SchLibItemRecordType, pinstr_to_records
 
 
 def handle_pin_records(records: Iterable[Dict[bytes, bytes]]) -> list:
@@ -136,7 +138,8 @@ class SLIRPin(SchLibItemRecord):
         x1 = self.loc_x + int(math.cos(math.radians(self.rotation))) * self.pinlength
         y1 = self.loc_y + int(math.sin(math.radians(self.rotation))) * self.pinlength
         print(
-            f"PIN {st: <20} ({self.loc_x},{x1}) ({self.loc_y},{y1}) {self.name: <8} {self.designator}"
+            f"PIN {st: <20} ({self.loc_x},{x1}) ({self.loc_y},{y1}) "
+            f"{self.name: <8} {self.designator}"
         )
         ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=10)
         # ax.plot((self.loc_x, x1), (self.loc_y, y1), "k", linewidth=self.linewidth)

@@ -1,7 +1,7 @@
 from enum import IntEnum, unique
 from typing import Dict, List, Tuple, Union
 
-from pyaltium.helpers import byte_arr_str
+from pyaltium._helpers import byte_arr_str
 
 
 @unique
