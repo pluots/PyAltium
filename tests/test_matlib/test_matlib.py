@@ -1,5 +1,4 @@
 import tempfile
-from io import StringIO
 
 from pyaltium import MaterialsLibrary
 

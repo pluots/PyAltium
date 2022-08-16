@@ -2,16 +2,23 @@
 
 Baase classes for everything we do
 """
-
+from __future__ import annotations
 
 from typing import AnyStr, Generic, Iterable, List, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import olefile
 
-from pyaltium.exceptions import PyAltiumError
-from pyaltium.magic import MAX_READ_SIZE_BYTES
+from pyaltium._helpers import MAX_READ_SIZE_BYTES
+from pyaltium.exceptions import FileError
 
+
+class Magic:
+    """Magic values and strings used in Altium files"""
+    SCHLIB_HEADER = (
+        "HEADER=Protel for Windows - Schematic Library Editor Binary File Version 5.0"
+    )
+    PCBLIB_HEADER = "PCB 6.0 Binary Library File"
 
 class OleMixin:
     """Helper functions for anything with an ole file_name object."""
@@ -73,10 +80,10 @@ class AltiumFileMixin(OleMixin):
         self.file_name = file_name
 
         if not olefile.isOleFile(file_name):
-            raise PyAltiumError("Unable to open file. Is it actually an Altium binary?")
+            raise FileError("Unable to open file. Is it actually an Altium binary?")
 
         if not self._verify_file_type(file_name):
-            raise PyAltiumError("Appears to be the wrong file type.")
+            raise FileError("Appears to be the wrong file type.")
 
         self._update_header_and_section_keys()
         self._update_item_list()

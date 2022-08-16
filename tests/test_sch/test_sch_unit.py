@@ -1,4 +1,4 @@
-from pyaltium.sch.helpers import SchPinType, pinstr_worker
+from pyaltium.sch._helpers import SchPinType, pinstr_worker
 
 
 def test_byte_arr_str():

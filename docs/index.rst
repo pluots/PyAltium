@@ -25,8 +25,7 @@ submit bugs or request features.
    :caption: Contents:
 
    installation
-   basic_usage
-   api
+   usage/index
 
 
 

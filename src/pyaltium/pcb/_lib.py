@@ -1,9 +1,37 @@
 import olefile
 
-from pyaltium.base import AltiumLibMixin
-from pyaltium.helpers import altium_string_split, altium_value_from_key
-from pyaltium.magic import MAX_READ_SIZE_BYTES, PCBLIB_HEADER
-from pyaltium.pcb.libitem import PcbLibItem
+from pyaltium._helpers import (
+    MAX_READ_SIZE_BYTES,
+    altium_string_split,
+    altium_value_from_key,
+)
+from pyaltium.base import AltiumLibItemMixin, AltiumLibMixin, Magic
+
+
+class PcbLibItem(AltiumLibItemMixin):
+    def __init__(
+        self,
+        footprintref: str,
+        description: str,
+        height: float,
+        file_name: str,
+    ) -> None:
+        super().__init__()
+        self.footprintref = footprintref
+        self.description = description
+        self.height = height
+        self.file_name = file_name
+
+    def _run_load(self) -> None:
+        raise NotImplementedError
+
+    def as_dict(self) -> dict:
+        """Create a parsable dict."""
+        return {
+            "footprintref": self.footprintref,
+            "description": self.description,
+            "height": self.height,
+        }
 
 
 class PcbLib(AltiumLibMixin[PcbLibItem]):
@@ -12,7 +40,7 @@ class PcbLib(AltiumLibMixin[PcbLibItem]):
     def _verify_file_type(self, fname: str) -> bool:
         """Check if our magic string is in the header"""
         fh_str = self._read_decode_stream("FileHeader", 128)
-        return PCBLIB_HEADER in fh_str
+        return Magic.PCBLIB_HEADER in fh_str
 
     def _update_header_and_section_keys(self) -> None:
         """Just update class's _header_keys_list object"""

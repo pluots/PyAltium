@@ -1,8 +1,7 @@
-"""exceptions.py
-
-Custom exception classes
+"""Custom exception classes used by this package.
 """
 
 
-class PyAltiumError(Exception):
-    """Generic exception for our package."""
+class FileError(Exception):
+    """An error that occurs when a file cannot be operated.
+    """
