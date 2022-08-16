@@ -11,3 +11,7 @@ build:
   tools:
     python: "3.10"
     rust: "1.61"
+
+python:
+  install:
+   - requirements: docs/requirements.txt
