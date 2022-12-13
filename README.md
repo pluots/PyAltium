@@ -1,5 +1,7 @@
 # PyAltium
 
+NOTE: This tool is currently broken and incomplete, and is awaiting a rewrite!
+
 A tool to process Altium file types. Currently this tool is in alpha and does not have any parts fully functioning, except for the listing of PCBLib and SCHLib libraries.
 
 See full documentation here (WIP): [pyaltium.readthedocs.io](http://pyaltium.readthedocs.io)
