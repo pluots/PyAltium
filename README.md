@@ -1,6 +1,11 @@
 # PyAltium
 
 NOTE: This tool is currently broken and incomplete, and is awaiting a rewrite!
+I have a rewrite in Rust that is significantly more usable ([documentation](http://docs.rs/altium)
+and [repository](https://github.com/pluots/altium)). Python bindings are a long way
+off, but contributions there are welcome!
+
+---
 
 A tool to process Altium file types. Currently this tool is in alpha and does not have any parts fully functioning, except for the listing of PCBLib and SCHLib libraries.
 
